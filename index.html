@@ -87,6 +87,7 @@ var OpenStreetMap_HOT = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{
 // 	  controlLayers.addBaseLayer(Thunderforest_Transport, 'Transport');
   // see more basemap options at https://leaflet-extras.github.io/leaflet-providers/preview/
 
+  let html_tpl = '<iframe width="424" height="238" src="https://www.youtube.com/embed/[vid]" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
   // Read markers data from data.csv
   $.get('./poi.csv', function(csvString) {
 
@@ -100,7 +101,7 @@ var OpenStreetMap_HOT = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{
 
       var marker = L.marker([row.lat, row.lon], {
         opacity: 1
-      }).bindPopup('<p>' + row.name + '<br />' + row.addr + '<br />' + row.tel + '</p>'); // .setContent('<p>Hello world!<br />This is a nice popup.</p>')
+      }).bindPopup('<p>' + row.name + '<br />' + row.addr + '<br />' + row.tel + '</p>' + html_tpl.replace(/\[vid\]/g, row.media)); // .setContent('<p>Hello world!<br />This is a nice popup.</p>')
       
       marker.addTo(map);
     }
