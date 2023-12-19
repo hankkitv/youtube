@@ -86,8 +86,8 @@ var OpenStreetMap_HOT = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{
 // });	 
 // 	  controlLayers.addBaseLayer(Thunderforest_Transport, 'Transport');
   // see more basemap options at https://leaflet-extras.github.io/leaflet-providers/preview/
-
-  let html_tpl = '<iframe width="424" height="238" src="https://www.youtube.com/embed/[vid]" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
+  // width="424" height="238" 
+  let html_tpl = '<iframe src="https://www.youtube.com/embed/[vid]" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>';
   // Read markers data from data.csv
   $.get('./poi.csv', function(csvString) {
 
