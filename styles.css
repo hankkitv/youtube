@@ -1,0 +1,952 @@
+/* =========================================
+   HankkiTV Map UI
+   Mobile-first styles
+========================================= */
+
+
+/* =========================================
+   BASE
+========================================= */
+
+html,
+body {
+
+    height:100%;
+    margin:0;
+
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+
+    overflow:hidden;
+
+}
+
+
+#map {
+
+    position:absolute;
+
+    inset:0;
+
+}
+
+
+
+.leaflet-container {
+
+    width:100%;
+    height:100%;
+
+}
+
+
+
+
+
+/* =========================================
+   SEARCH BAR
+========================================= */
+
+
+.search-container {
+
+    position:absolute;
+
+    z-index:5000;
+
+    top:
+        max(12px, env(safe-area-inset-top));
+
+    left:12px;
+    right:12px;
+
+    pointer-events:none;
+
+}
+
+
+.search-box {
+
+    pointer-events:auto;
+
+    display:flex;
+
+    align-items:center;
+
+
+    width:100%;
+
+
+    background:white;
+
+    border-radius:18px;
+
+
+    box-shadow:
+        0 8px 25px rgba(0,0,0,.18);
+
+
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease;
+
+}
+
+
+
+.search-box:focus-within {
+
+    transform:
+        translateY(-2px);
+
+
+    box-shadow:
+        0 12px 35px rgba(0,0,0,.25);
+
+}
+
+
+
+.search-icon {
+
+    padding:0 14px;
+
+    font-size:22px;
+
+}
+
+
+
+#searchInput {
+
+
+    flex:1;
+
+
+    border:none;
+
+    outline:none;
+
+
+    padding:
+        16px 10px;
+
+
+    font-size:16px;
+
+
+    background:transparent;
+
+}
+
+
+
+#clearSearch {
+
+    padding:0 16px;
+
+    color:#777;
+
+    font-size:20px;
+
+    cursor:pointer;
+
+}
+
+
+
+
+
+/* =========================================
+   RESULTS SHEET
+========================================= */
+
+
+#searchResults {
+
+
+    position:absolute;
+
+
+    z-index:4999;
+
+
+    display:none;
+
+
+    background:white;
+
+
+    overflow:hidden;
+
+
+    box-shadow:
+        0 -8px 35px rgba(0,0,0,.2);
+
+
+}
+
+
+
+/* Mobile bottom sheet */
+
+@media(max-width:768px){
+
+
+    #searchResults {
+
+
+        left:0;
+        right:0;
+        bottom:0;
+
+
+        height:65vh;
+
+
+        border-radius:
+            26px 26px 0 0;
+
+
+        animation:
+            sheetUp .25s ease;
+
+    }
+
+
+}
+
+
+
+/* Desktop panel */
+
+@media(min-width:769px){
+
+
+    .search-container {
+
+        left:30px;
+
+        right:auto;
+
+    }
+
+
+
+    .search-box {
+
+        width:420px;
+
+    }
+
+
+
+    #searchResults {
+
+
+        top:85px;
+
+        left:30px;
+
+
+        width:420px;
+
+
+        max-height:70vh;
+
+
+        border-radius:20px;
+
+    }
+
+
+}
+
+
+
+
+
+
+/* =========================================
+   SHEET HEADER
+========================================= */
+
+
+.sheet-handle {
+
+
+    width:42px;
+
+    height:5px;
+
+    background:#d0d0d0;
+
+    border-radius:20px;
+
+
+    margin:
+        12px auto;
+
+}
+
+
+
+.sheet-header {
+
+
+    padding:
+        8px 18px 15px;
+
+
+    font-size:18px;
+
+
+    font-weight:700;
+
+
+    border-bottom:
+        1px solid #eee;
+
+}
+
+
+
+
+
+#resultsList {
+
+
+    overflow-y:auto;
+
+    height:
+        calc(100% - 60px);
+
+}
+
+
+
+
+
+
+/* =========================================
+   RESULT CARD
+========================================= */
+
+
+.result-item {
+
+
+    padding:18px;
+
+
+    border-bottom:
+        1px solid #ededed;
+
+
+    cursor:pointer;
+
+
+    transition:
+        background .15s ease,
+        transform .15s ease;
+
+}
+
+
+
+.result-item:hover {
+
+
+    background:#f7faff;
+
+
+}
+
+
+
+.result-item:active {
+
+
+    background:#edf5ff;
+
+
+    transform:
+        scale(.99);
+
+}
+
+
+
+
+.result-title {
+
+
+    font-size:17px;
+
+
+    font-weight:700;
+
+
+    color:#222;
+
+
+    margin-bottom:8px;
+
+
+}
+
+
+
+.result-sub {
+
+
+    font-size:14px;
+
+
+    line-height:1.55;
+
+
+    color:#666;
+
+
+}
+
+
+
+
+
+
+/* =========================================
+   LEAFLET CONTROL POSITIONING
+========================================= */
+
+
+@media(max-width:768px){
+
+
+    .leaflet-top.leaflet-right {
+
+
+        margin-top:75px;
+
+    }
+
+
+}
+
+
+
+
+
+/* =========================================
+   ANIMATIONS
+========================================= */
+
+
+@keyframes sheetUp {
+
+
+    from {
+
+        transform:
+            translateY(100%);
+
+    }
+
+
+    to {
+
+        transform:
+            translateY(0);
+
+    }
+
+
+}
+
+
+
+
+
+/* =========================================
+   SAFE AREA SUPPORT
+========================================= */
+
+
+@supports(padding:max(0px)){
+
+
+    #searchResults {
+
+
+        padding-bottom:
+            env(safe-area-inset-bottom);
+
+    }
+
+
+}
+
+/* =====================================
+   CUSTOM RESTAURANT MARKERS
+===================================== */
+
+
+/* =====================================
+   BRAND RESTAURANT MARKER
+===================================== */
+
+
+.restaurant-marker {
+
+
+    width:44px;
+
+    height:44px;
+
+
+    border-radius:50%;
+
+
+    background:white;
+
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+
+    border:
+
+    3px solid white;
+
+
+    box-shadow:
+
+    0 4px 14px rgba(0,0,0,.35);
+
+
+    overflow:hidden;
+
+
+    transition:
+
+    transform .2s ease,
+    box-shadow .2s ease;
+
+
+}
+
+
+
+.restaurant-marker img {
+
+
+    width:40px;
+
+    height:40px;
+
+
+    object-fit:contain;
+
+
+}
+
+
+
+.restaurant-marker.selected {
+
+
+    transform:
+
+    scale(1.35);
+
+
+    box-shadow:
+
+    0 0 0 10px rgba(37,99,235,.25),
+    0 8px 20px rgba(0,0,0,.4);
+
+
+}
+
+/* =====================================
+   RESTAURANT DETAIL SHEET
+===================================== */
+
+
+#restaurantDetails {
+
+    position:absolute;
+
+    z-index:6000;
+
+    background:white;
+
+    display:none;
+
+    box-shadow:
+        0 -8px 35px rgba(0,0,0,.25);
+
+}
+
+
+
+/* Mobile */
+
+@media(max-width:768px){
+
+
+#restaurantDetails {
+
+
+    left:0;
+    right:0;
+    bottom:0;
+
+
+    border-radius:
+        28px 28px 0 0;
+
+
+    padding-bottom:
+        env(safe-area-inset-bottom);
+
+
+    animation:
+        detailUp .3s ease;
+
+
+}
+
+
+
+}
+
+
+/* Desktop */
+
+@media(min-width:769px){
+
+
+#restaurantDetails {
+
+
+    left:30px;
+
+    bottom:30px;
+
+
+    width:420px;
+
+
+    border-radius:22px;
+
+
+}
+
+
+}
+
+
+
+.detail-handle {
+
+
+    width:42px;
+
+    height:5px;
+
+    background:#ccc;
+
+    border-radius:20px;
+
+    margin:12px auto;
+
+}
+
+
+
+#detailContent {
+
+    padding:20px;
+
+}
+
+
+
+.detail-title {
+
+
+    font-size:22px;
+
+    font-weight:700;
+
+    margin-bottom:10px;
+
+
+}
+
+
+
+.detail-address {
+
+
+    color:#666;
+
+    line-height:1.5;
+
+    margin-bottom:15px;
+
+}
+
+
+
+.detail-actions {
+
+
+    display:flex;
+
+    gap:10px;
+
+}
+
+
+
+.detail-button {
+
+
+    flex:1;
+
+    padding:12px;
+
+    border-radius:14px;
+
+    border:none;
+
+    cursor:pointer;
+
+    background:#2563eb;
+
+    color:white;
+
+    font-size:15px;
+
+}
+
+
+
+.detail-button.secondary {
+
+
+    background:#eee;
+
+    color:#333;
+
+}
+
+
+
+#closeDetails {
+
+
+    position:absolute;
+
+    right:15px;
+
+    top:12px;
+
+    border:none;
+
+    background:#eee;
+
+    width:34px;
+
+    height:34px;
+
+    border-radius:50%;
+
+}
+
+
+
+@keyframes detailUp {
+
+
+from {
+
+transform:translateY(100%);
+
+}
+
+
+to {
+
+transform:translateY(0);
+
+}
+
+
+}
+/* =====================================
+   DETAIL MEDIA + MENU
+===================================== */
+
+
+.video-thumbnail {
+
+    width:100%;
+
+    height:220px;
+
+    object-fit:cover;
+
+    cursor:pointer;
+
+}
+
+
+
+.detail-alias {
+
+    color:#777;
+
+    margin-bottom:10px;
+
+    font-size:15px;
+
+}
+
+
+
+.detail-menu {
+
+
+    margin:
+
+    15px 0;
+
+
+    padding:
+
+    14px;
+
+
+    background:#f7f7f7;
+
+
+    border-radius:16px;
+
+
+    line-height:1.6;
+
+
+}
+
+
+
+.detail-menu div {
+
+
+    margin-top:8px;
+
+    color:#555;
+
+}
+
+
+
+.share-button {
+
+
+    margin-top:12px;
+
+
+    width:100%;
+
+
+    padding:13px;
+
+
+    border-radius:14px;
+
+
+    border:none;
+
+
+    background:#111;
+
+
+    color:white;
+
+
+    font-size:15px;
+
+
+}
+
+/* =====================================
+   LOCATION BUTTON
+===================================== */
+
+
+#locationButton {
+
+
+    position:absolute;
+
+
+    z-index:5000;
+
+
+    right:18px;
+
+
+    bottom:30px;
+
+
+    width:56px;
+
+
+    height:56px;
+
+
+    border-radius:50%;
+
+
+    border:none;
+
+
+    background:white;
+
+
+    font-size:26px;
+
+
+    cursor:pointer;
+
+
+    box-shadow:
+
+    0 6px 20px rgba(0,0,0,.25);
+
+
+}
+
+
+
+#locationButton:active {
+
+
+    transform:scale(.95);
+
+
+}
