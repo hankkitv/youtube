@@ -1,237 +1,458 @@
-/* search.js */
+/* js/search.js */
+
 
 let fuse;
+
 let restaurantIndex = [];
+
 let currentResults = [];
+
 let selectedIndex = -1;
 
-function buildSearchIndex(data, markers) {
+let resultsScrollTop = 0;
 
-    restaurantIndex = data.map((row, i) => ({
-        id: i,
-        marker: markers[i],
-        row: row
+
+
+
+function buildSearchIndex(data){
+
+
+    restaurantIndex = data.map(restaurant => ({
+
+        restaurant
+
     }));
 
-    fuse = new Fuse(restaurantIndex, {
 
-        includeScore: true,
+    fuse = new Fuse(
 
-        threshold: 0.35,
+        restaurantIndex,
 
-        ignoreLocation: true,
+        {
 
-        minMatchCharLength: 1,
+            includeScore:true,
 
-        shouldSort: true,
+            threshold:0.35,
 
-        keys: [
+            ignoreLocation:true,
 
-            {
-                name: "row.name",
-                weight: 4
-            },
+            minMatchCharLength:1,
 
-            {
-                name: "row.alias",
-                weight: 3
-            },
+            shouldSort:true,
 
-            {
-                name: "row.addr",
-                weight: 2
-            },
 
-            {
-                name: "row.menu",
-                weight: 2
-            },
+            keys:[
 
-            {
-                name: "row.tel",
-                weight: 1
-            }
+                {
+                    name:"restaurant.name",
+                    weight:4
+                },
 
-        ]
+                {
+                    name:"restaurant.alias",
+                    weight:3
+                },
 
-    });
+                {
+                    name:"restaurant.address",
+                    weight:2
+                },
+
+                {
+                    name:"restaurant.menu",
+                    weight:2
+                },
+
+                {
+                    name:"restaurant.phone",
+                    weight:1
+                }
+
+            ]
+
+        }
+
+    );
 
 }
 
-function searchRestaurants(keyword) {
+
+
+
+
+function searchRestaurants(keyword){
+
 
     keyword = keyword.trim();
 
-    if (!keyword)
+
+    if(!keyword)
         return [];
 
-    return fuse.search(keyword)
-        .slice(0, 20)
-        .map(x => x.item);
+
+    return fuse
+
+        .search(keyword)
+
+        .slice(0,20)
+
+        .map(result => result.item);
 
 }
 
+
+
+
+
 function escapeHtml(str){
 
+
     return (str || "")
+
         .replace(/&/g,"&amp;")
+
         .replace(/</g,"&lt;")
+
         .replace(/>/g,"&gt;");
 
 }
 
-function renderSearchResults(results) {
+
+
+
+
+
+
+function renderSearchResults(results){
+
 
     const panel =
-        document.getElementById("searchResults");
+        document.getElementById(
+            "searchResults"
+        );
+
 
     const list =
-        document.getElementById("resultsList");
+        document.getElementById(
+            "resultsList"
+        );
+
+
+
+    resultsScrollTop =
+        list.scrollTop;
+
 
 
     list.innerHTML = "";
 
+
     selectedIndex = -1;
 
 
-    if (!results.length){
+
+
+    if(!results.length){
+
 
         panel.style.display="none";
+
 
         return;
 
     }
+
+
 
 
     panel.style.display="block";
 
 
+
+
+
     results.forEach((item,index)=>{
 
 
-        const div=document.createElement("div");
+        const restaurant =
+            item.restaurant;
 
 
-        div.className="result-item";
 
-        div.dataset.index=index;
+        const div =
+            document.createElement(
+                "div"
+            );
 
 
-        div.innerHTML=`
+
+        div.className =
+            "result-item";
+
+
+        if(
+            AppState.selectedRestaurant &&
+            AppState.selectedRestaurant.id === restaurant.id
+        ){
+
+            div.classList.add(
+                "selected-result"
+            );
+
+        }
+
+
+
+        div.dataset.index =
+            index;
+
+
+
+
+
+        div.innerHTML = `
+
 
 <div class="result-title">
-🍽️ ${escapeHtml(item.row.name)}
+
+🍽️ ${escapeHtml(restaurant.name)}
+
 </div>
 
 
 <div class="result-sub">
 
-${item.row.alias 
-? escapeHtml(item.row.alias)+"<br>"
-:""}
 
-📍 ${escapeHtml(item.row.addr)}
+${
 
-<br>
+restaurant.alias
 
-☎️ ${escapeHtml(item.row.tel || "")}
+?
+
+escapeHtml(restaurant.alias) + "<br>"
+
+:
+
+""
+
+}
+
+
+
+📍 ${escapeHtml(restaurant.address)}
 
 
 ${
-addDistance(item.row)
+
+restaurant.phone
+
 ?
-`
-<br>
-🚶 ${addDistance(item.row)}
-`
+
+`<br>☎ ${escapeHtml(restaurant.phone)}`
+
 :
+
 ""
+
+}
+
+
+
+${
+
+typeof addDistance === "function" &&
+
+addDistance(restaurant)
+
+?
+
+`<br>🚶 ${addDistance(restaurant)}`
+
+:
+
+""
+
 }
 
 
 </div>
 
+
 `;
 
 
-        div.onclick=()=>{
 
-            zoomToRestaurant(item);
+
+
+        div.onclick = ()=>{
+
+
+            panel.style.display="none";
+
+
+            focusRestaurant(
+
+                restaurant
+
+            );
+
 
         };
+
+
+
 
 
         list.appendChild(div);
 
 
+
     });
 
 
-}
 
-function zoomToRestaurant(item){
 
-    document.getElementById("searchResults").style.display="none";
 
-    map.flyTo(
-        [item.row.lat,item.row.lon],
-        17,
-        {
-            animate:true,
-            duration:0.8
-        });
+    list.scrollTop =
+        resultsScrollTop;
 
-    setTimeout(()=>{
-        item.marker.openPopup();
-    },450);
+
 
 }
 
-const doSearch=debounce(()=>{
 
-    currentResults=searchRestaurants(
-        document.getElementById("searchInput").value
+
+
+
+
+
+
+
+const doSearch = debounce(()=>{
+
+
+    currentResults =
+
+        searchRestaurants(
+
+            document
+
+            .getElementById(
+                "searchInput"
+            )
+
+            .value
+
+        );
+
+
+
+    renderSearchResults(
+
+        currentResults
+
     );
 
-    renderSearchResults(currentResults);
 
 },200);
 
+
+
+
+
+
+
 function debounce(fn,delay){
+
 
     let timer;
 
+
+
     return function(){
+
 
         clearTimeout(timer);
 
-        timer=setTimeout(fn,delay);
 
-    }
+
+        timer =
+
+            setTimeout(
+
+                fn,
+
+                delay
+
+            );
+
+    };
+
 
 }
 
+
+
+
+
+
+
+
+
 function highlightSelection(){
 
+
     document
-        .querySelectorAll(".result-item")
-        .forEach(el=>{
 
-            el.style.background="white";
+    .querySelectorAll(
+        ".result-item"
+    )
 
-        });
+    .forEach(el=>{
 
-    if(selectedIndex<0)
+
+        el.style.background =
+            "white";
+
+
+    });
+
+
+
+
+
+    if(selectedIndex < 0)
         return;
 
-    const el=document.querySelector(
-        `.result-item[data-index="${selectedIndex}"]`
-    );
+
+
+
+
+    const el =
+
+        document.querySelector(
+
+            `.result-item[data-index="${selectedIndex}"]`
+
+        );
+
+
+
+
 
     if(!el)
         return;
 
-    el.style.background="#edf5ff";
+
+
+
+
+    el.style.background =
+        "#edf5ff";
+
+
+
+
 
     el.scrollIntoView({
 
@@ -239,123 +460,483 @@ function highlightSelection(){
 
     });
 
+
+
 }
+
+
+
+
+
+
+
+
 
 function initializeSearch(){
 
+
+
     initializeSheet();
-    const input=document.getElementById("searchInput");
 
-    input.addEventListener("input",doSearch);
 
-    input.addEventListener("keydown",(e)=>{
 
-        if(!currentResults.length)
-            return;
 
-        switch(e.key){
 
-            case "ArrowDown":
+    const input =
 
-                e.preventDefault();
+        document.getElementById(
+            "searchInput"
+        );
 
-                selectedIndex++;
 
-                if(selectedIndex>=currentResults.length)
-                    selectedIndex=0;
 
-                highlightSelection();
 
-                break;
 
-            case "ArrowUp":
+    const list =
 
-                e.preventDefault();
+        document.getElementById(
+            "resultsList"
+        );
 
-                selectedIndex--;
 
-                if(selectedIndex<0)
-                    selectedIndex=currentResults.length-1;
 
-                highlightSelection();
 
-                break;
 
-            case "Enter":
+    /*
+        Let Leaflet ignore
+        scrolling inside results
+    */
 
-                e.preventDefault();
 
-                if(selectedIndex>=0){
+    if(window.L){
 
-                    zoomToRestaurant(
-                        currentResults[selectedIndex]
-                    );
 
-                }
+        L.DomEvent
+            .disableClickPropagation(
+                list
+            );
 
-                break;
 
-            case "Escape":
+        L.DomEvent
+            .disableScrollPropagation(
+                list
+            );
 
-                document.getElementById("searchResults").style.display="none";
 
-                break;
+    }
 
-        }
 
-    });
 
-    document.addEventListener("click",(e)=>{
 
-        if(
-            !e.target.closest(".search-box") &&
-            !e.target.closest("#searchResults")
-        ){
 
-            document.getElementById("searchResults").style.display="none";
+
+    list.addEventListener(
+
+        "scroll",
+
+        ()=>{
+
+
+            resultsScrollTop =
+                list.scrollTop;
+
 
         }
 
-    });
+    );
+
+
+
+
+
+
+
+    input.addEventListener(
+
+        "input",
+
+        doSearch
+
+    );
+
+
+
+
+
+
+
+    input.addEventListener(
+
+        "focus",
+
+        ()=>{
+
+
+            if(currentResults.length){
+
+
+                document
+
+                .getElementById(
+                    "searchResults"
+                )
+
+                .style.display =
+                    "block";
+
+
+            }
+
+
+        }
+
+    );
+
+
+
+
+
+
+
+
+
+    input.addEventListener(
+
+        "keydown",
+
+        e=>{
+
+
+            if(!currentResults.length)
+                return;
+
+
+
+
+
+            switch(e.key){
+
+
+
+                case "ArrowDown":
+
+
+
+                    e.preventDefault();
+
+
+
+                    selectedIndex++;
+
+
+
+                    if(
+                        selectedIndex >=
+                        currentResults.length
+                    )
+
+                    {
+
+                        selectedIndex = 0;
+
+                    }
+
+
+
+                    highlightSelection();
+
+
+
+                    break;
+
+
+
+
+
+
+                case "ArrowUp":
+
+
+
+                    e.preventDefault();
+
+
+
+                    selectedIndex--;
+
+
+
+                    if(selectedIndex < 0)
+
+                    {
+
+                        selectedIndex =
+                            currentResults.length - 1;
+
+                    }
+
+
+
+                    highlightSelection();
+
+
+
+                    break;
+
+
+
+
+
+
+                case "Enter":
+
+
+
+                    e.preventDefault();
+
+
+
+                    if(selectedIndex >= 0){
+
+
+
+                        document
+
+                        .getElementById(
+                            "searchResults"
+                        )
+
+                        .style.display =
+                            "none";
+
+
+
+
+
+                        focusRestaurant(
+
+                            currentResults[selectedIndex]
+
+                            .restaurant
+
+                        );
+
+
+
+                    }
+
+
+
+                    break;
+
+
+
+
+
+
+
+                case "Escape":
+
+
+
+                    document
+
+                    .getElementById(
+                        "searchResults"
+                    )
+
+                    .style.display =
+                        "none";
+
+
+
+                    break;
+
+
+            }
+
+
+        }
+
+    );
+
+
+
+
+
+
+
+
+
+    document.addEventListener(
+
+        "click",
+
+        e=>{
+
+
+            if(
+
+                !e.target.closest(
+                    ".search-box"
+                )
+
+                &&
+
+                !e.target.closest(
+                    "#searchResults"
+                )
+
+            ){
+
+
+                document
+
+                .getElementById(
+                    "searchResults"
+                )
+
+                .style.display =
+                    "none";
+
+
+            }
+
+
+        }
+
+    );
+
+
 
 }
+
+
+
+
+
+
+
+
 
 function initializeSheet(){
 
-const sheet =
-document.getElementById("searchResults");
+
+    const sheet =
+
+        document.getElementById(
+            "searchResults"
+        );
 
 
-let startY=0;
+
+    let startY = 0;
 
 
-sheet.addEventListener(
-"touchstart",
-(e)=>{
-
-startY=e.touches[0].clientY;
-
-});
 
 
-sheet.addEventListener(
-"touchmove",
-(e)=>{
+
+    sheet.addEventListener(
+
+        "touchstart",
+
+        e=>{
 
 
-let distance =
-e.touches[0].clientY-startY;
+            startY =
+                e.touches[0].clientY;
 
 
-if(distance>120){
+        }
 
-sheet.style.display="none";
+    );
+
+
+
+
+
+
+
+    sheet.addEventListener(
+
+        "touchmove",
+
+        e=>{
+
+
+            const distance =
+
+                e.touches[0].clientY -
+                startY;
+
+
+
+
+
+            if(distance > 120){
+
+
+                sheet.style.display =
+                    "none";
+
+
+            }
+
+
+        }
+
+    );
+
 
 }
 
+function updateSelectedSearchResult(){
 
-});
+
+    document
+
+    .querySelectorAll(".result-item")
+
+    .forEach(item=>{
+
+
+        const index =
+            item.dataset.index;
+
+
+        const restaurant =
+            currentResults[index]
+            ?.restaurant;
+
+
+
+        if(
+
+            AppState.selectedRestaurant &&
+
+            restaurant &&
+
+            restaurant.id ===
+            AppState.selectedRestaurant.id
+
+        ){
+
+            item.classList.add(
+                "selected-result"
+            );
+
+
+        }
+        else{
+
+            item.classList.remove(
+                "selected-result"
+            );
+
+        }
+
+
+    });
 
 
 }
-

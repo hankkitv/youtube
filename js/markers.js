@@ -41,21 +41,21 @@ function createRestaurantMarker(row){
 
 
 
-    marker.bindPopup(`
+    // marker.bindPopup(`
 
-        <strong>
-        ${row.name}
-        </strong>
+    //     <strong>
+    //     ${row.name}
+    //     </strong>
 
-        <br>
+    //     <br>
 
-        ${row.address || ""}
+    //     ${row.address || ""}
 
-        <br>
+    //     <br>
 
-        ${row.phone || ""}
+    //     ${row.phone || ""}
 
-        `);
+    //     `);
 
 
 
@@ -67,22 +67,9 @@ function createRestaurantMarker(row){
 "click",
 ()=>{
 
-    AppState.selectedRestaurant = row;
-    selectMarker(marker);
-
-    map.flyTo(
-        [
-            row.lat,
-            row.lon
-        ],
-        17,
-        {
-            duration:.6
-        }
+    focusRestaurant(
+        row
     );
-
-
-    showRestaurantDetails(row);
 
 });
 
@@ -94,32 +81,28 @@ function createRestaurantMarker(row){
 
 function selectMarker(marker){
 
+    if(!marker)
+        return;
+
+    const element =
+        marker.getElement();
+
+    if(!element)
+        return;
 
     if(selectedMarker){
 
         selectedMarker
-        .getElement()
-        ?.querySelector(
-            ".restaurant-marker"
-        )
-        ?.classList.remove(
-            "selected"
-        );
+            .getElement()
+            ?.querySelector(".restaurant-marker")
+            ?.classList.remove("selected");
 
     }
 
+    element
+        .querySelector(".restaurant-marker")
+        ?.classList.add("selected");
 
-
-    marker
-    .getElement()
-    ?.querySelector(
-        ".restaurant-marker"
-    )
-    ?.classList.add(
-        "selected"
-    );
-
-
-    selectedMarker=marker;
+    selectedMarker = marker;
 
 }

@@ -4,13 +4,24 @@
 const restaurants = AppState.restaurants;
 const markers = AppState.markers;
 
+async function loadCSV(){
+
+
+    const response =
+        await fetch(
+            "./poi.csv"
+        );
+
+
+    return await response.text();
+
+
+}
 
 function loadRestaurants(){
 
 
-    return $.get(
-        "./poi.csv"
-    )
+    return loadCSV()
     .then(csv=>{
 
 
@@ -73,8 +84,7 @@ function loadRestaurants(){
 
 
         buildSearchIndex(
-            restaurants,
-            markers
+            restaurants
         );
 
 

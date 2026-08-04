@@ -36,11 +36,62 @@ function parseMenu(menu){
 
 }
 
+function updateSEO(row){
 
+
+    const title =
+        `${row.name} | HankkiTV`;
+
+
+    document.title =
+        title;
+
+
+
+    const description =
+        row.address ||
+        "Discover restaurants with HankkiTV";
+
+
+
+    document
+    .getElementById("ogTitle")
+    ?.setAttribute(
+        "content",
+        title
+    );
+
+
+    document
+    .getElementById("ogDescription")
+    ?.setAttribute(
+        "content",
+        description
+    );
+
+
+    document
+    .getElementById("ogImage")
+    ?.setAttribute(
+        "content",
+        row.thumbnail || "favicon.png"
+    );
+
+
+    document
+    .getElementById("ogUrl")
+    ?.setAttribute(
+        "content",
+        window.location.href
+    );
+
+
+}
 
 
 function showRestaurantDetails(row){
 
+    updateSEO(row);
 
     const panel =
         document.getElementById(
@@ -181,9 +232,8 @@ ${row.lon}
 class="share-button"
 onclick="
 shareRestaurant(
-'${row.name}',
-'${row.lat}',
-'${row.lon}'
+'${row.id}',
+'${row.name}'
 )
 ">
 
@@ -233,13 +283,14 @@ function openDirections(lat,lon){
 
 
 async function shareRestaurant(
-name,
-lat,
-lon
+id,
+name
 ){
 
     const url =
-    `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
+        APP_CONFIG.baseURL +
+        "?place=" +
+        id;
 
 
     if(

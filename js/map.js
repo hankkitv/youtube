@@ -63,6 +63,23 @@ function setupLayers(){
         .addTo(map);
 
 
+    const dark =
+        L.tileLayer(
+            "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+            {
+                maxZoom:19,
+                attribution:
+                "© OpenStreetMap © CARTO"
+            }
+        )
+        .addTo(map);
+
+
+
+    controlLayers.addBaseLayer(
+        dark,
+        "Carto Dark"
+    );
 
     const light =
         L.tileLayer(
@@ -100,7 +117,37 @@ function setupLayers(){
         "OSM"
     );
 
+    const osmh =
+        L.tileLayer(
+            "https://tile-{s}.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+            {
+                maxZoom:19,
+                attribution:
+                "© OpenStreetMap contributors"
+            }
+        );
 
+
+    controlLayers.addBaseLayer(
+        osmh,
+        "OSM Humanitarian"
+    );
+
+    const esri =
+        L.tileLayer(
+            "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+            {
+                maxZoom:19,
+                attribution:
+                "© Esri"
+            }
+        );
+
+
+    controlLayers.addBaseLayer(
+        esri,
+        "Esri World Street Map"
+    );
 
     const satellite =
         L.tileLayer(

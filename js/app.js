@@ -25,5 +25,53 @@ $(async function(){
 
     }
 
+    const place =
+        getPlaceFromURL();
+
+
+    if(place){
+
+        openRestaurantById(
+            place
+        );
+
+    }
+
 
 });
+
+if(
+    "serviceWorker" in navigator
+){
+
+    window.addEventListener(
+        "load",
+        ()=>{
+
+
+            navigator.serviceWorker
+            .register(
+                "./service-worker.js"
+            )
+
+            .then(()=>{
+
+                console.log(
+                    "HankkiTV offline enabled"
+                );
+
+            })
+
+            .catch(err=>{
+
+                console.error(
+                    err
+                );
+
+            });
+
+
+        }
+    );
+
+}

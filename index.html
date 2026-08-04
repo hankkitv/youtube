@@ -6,6 +6,7 @@
 HankkiTV Restaurant Map | Discover Restaurants Through YouTube
 </title>
 
+
 <meta charset="utf-8">
 <meta name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -15,18 +16,19 @@ content="Discover restaurants featured on HankkiTV with an interactive map and e
 
 <meta property="og:type" content="website">
 
-<meta property="og:title"
-content="HankkiTV Restaurant Map">
+<meta property="og:title" content="HankkiTV Restaurants" id="ogTitle">
 
-<meta property="og:description"
-content="Find restaurants featured on HankkiTV.">
+<meta property="og:description" content="Discover Korean restaurants with HankkiTV" id="ogDescription">
 
 <meta property="og:image"
-content="logo_t.png">
+content="logo_t.png" id="ogImage">
 
-<meta
-name="twitter:card"
-content="summary_large_image">
+<meta property="og:url" content="" id="ogUrl">
+
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2563eb">
 
 <link rel="preconnect"
 href="https://www.youtube.com">
@@ -98,7 +100,16 @@ autocomplete="off">
 
 </div>
 
+<div id="offlineBanner">
+
+    Offline mode
+
+</div>
+
+<script src="js/config.js"></script>
 <script src="js/state.js"></script>
+<script src="js/router.js"></script>
+<script src="js/navigation.js"></script>
 <script src="js/map.js"></script>
 <script src="js/markers.js"></script>
 <script src="js/storage.js"></script>
@@ -109,5 +120,42 @@ autocomplete="off">
 <script src="js/search.js"></script>
 
 <script src="js/app.js"></script>
+<script>
+    function updateOnlineStatus(){
+
+
+    document
+
+    .getElementById(
+        "offlineBanner"
+    )
+
+    .style.display =
+
+        navigator.onLine
+        ?
+        "none"
+        :
+        "block";
+
+
+}
+
+
+
+window.addEventListener(
+"online",
+updateOnlineStatus
+);
+
+
+window.addEventListener(
+"offline",
+updateOnlineStatus
+);
+
+
+updateOnlineStatus();
+</script>
 </body>
 </html>
