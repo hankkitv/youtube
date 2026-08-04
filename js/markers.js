@@ -49,13 +49,13 @@ function createRestaurantMarker(row){
 
         <br>
 
-        ${row.addr}
+        ${row.address || ""}
 
         <br>
 
-        ${row.tel || ""}
+        ${row.phone || ""}
 
-    `);
+        `);
 
 
 
@@ -67,6 +67,7 @@ function createRestaurantMarker(row){
 "click",
 ()=>{
 
+    AppState.selectedRestaurant = row;
     selectMarker(marker);
 
     map.flyTo(
@@ -82,7 +83,6 @@ function createRestaurantMarker(row){
 
 
     showRestaurantDetails(row);
-
 
 });
 

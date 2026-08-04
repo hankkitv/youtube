@@ -2,11 +2,37 @@
 <html class="no-js">
 <head>
 
-<title>HankkiTV Restaurants</title>
+<title>
+HankkiTV Restaurant Map | Discover Restaurants Through YouTube
+</title>
 
 <meta charset="utf-8">
 <meta name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta
+name="description"
+content="Discover restaurants featured on HankkiTV with an interactive map and embedded YouTube videos.">
+
+<meta property="og:type" content="website">
+
+<meta property="og:title"
+content="HankkiTV Restaurant Map">
+
+<meta property="og:description"
+content="Find restaurants featured on HankkiTV.">
+
+<meta property="og:image"
+content="logo_t.png">
+
+<meta
+name="twitter:card"
+content="summary_large_image">
+
+<link rel="preconnect"
+href="https://www.youtube.com">
+
+<link rel="preconnect"
+href="https://i.ytimg.com">
 
 <link rel="shortcut icon" href="favicon.png">
 
@@ -61,8 +87,6 @@ autocomplete="off">
 </div>
 <div id="restaurantDetails">
 
-    <div class="detail-handle"></div>
-
     <button id="closeDetails">
         ✕
     </button>
@@ -74,8 +98,10 @@ autocomplete="off">
 
 </div>
 
+<script src="js/state.js"></script>
 <script src="js/map.js"></script>
 <script src="js/markers.js"></script>
+<script src="js/storage.js"></script>
 <script src="js/restaurants.js"></script>
 <script src="js/details.js"></script>
 <script src="js/location.js"></script>

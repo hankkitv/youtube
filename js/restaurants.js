@@ -1,9 +1,8 @@
 /* js/restaurants.js */
 
 
-let restaurants=[];
-let markers=[];
-
+const restaurants = AppState.restaurants;
+const markers = AppState.markers;
 
 
 function loadRestaurants(){
@@ -15,39 +14,62 @@ function loadRestaurants(){
     .then(csv=>{
 
 
-        restaurants =
-            Papa.parse(
-                csv,
+        const loadedRestaurants =
+            Papa.parse(csv,
                 {
                     header:true,
                     dynamicTyping:true
-                }
-            )
-            .data;
+                })
+                .data
+                .filter(row => row.lat && row.lon)
+                .map(row => ({
+
+                    id: row.media,
+
+                    name: row.name,
+
+                    alias: row.alias,
+
+                    address: row.addr,
+
+                    lat: row.lat,
+
+                    lon: row.lon,
+
+                    phone: row.tel,
+
+                    link: row.link,
+
+                    menu: row.menu,
+
+                    flag: row.flag,
+
+                    youtubeId: row.media,
+
+                    thumbnail:
+                        `https://i.ytimg.com/vi/${row.media}/hqdefault.jpg`,
+
+                    favorite:
+                        isFavorite(row.media)
+
+                }));
 
 
-
-        restaurants.forEach(row=>{
-
-
-            if(!row.lat || !row.lon)
-                return;
+        restaurants.push(...loadedRestaurants);
 
 
+        restaurants.forEach(restaurant => {
 
             const marker =
-                createRestaurantMarker(row);
+                createRestaurantMarker(restaurant);
 
-
+            restaurant.marker = marker;
 
             markers.push(marker);
 
-
             markerCluster.addLayer(marker);
 
-
         });
-
 
 
         buildSearchIndex(

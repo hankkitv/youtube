@@ -1,21 +1,23 @@
 /* js/details.js */
 
 
-function youtubeThumbnail(videoId){
+function youtubePlayer(videoId){
 
     if(!videoId)
         return "";
 
     return `
-    <img
-        class="video-thumbnail"
-        src="https://img.youtube.com/vi/${videoId}/hqdefault.jpg"
-        onclick="
-        window.open(
-        'https://www.youtube.com/watch?v=${videoId}'
-        )
-        "
-    >
+    <div class="video-fullbleed">
+    <iframe
+        src="https://www.youtube.com/embed/${videoId}"
+        title="Youtube video"
+        loading="lazy"
+        allowfullscreen
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+    </iframe>
+    </div>
+
     `;
 
 }
@@ -55,26 +57,32 @@ function showRestaurantDetails(row){
 
     content.innerHTML = `
 
+    <div class="video-container">
 
     ${
-        row.media
+        row.youtubeId
         ?
-        youtubeThumbnail(row.media)
+        youtubePlayer(row.youtubeId)
         :
         ""
     }
-
-
-
-    <div class="detail-title">
-
-        ${row.name || ""}
-
     </div>
 
+    <div class="detail-handle"></div>
+
+    <div class="detail-info">
+    <div class="detail-header">
+
+    <div>
+
+        <div class="detail-title">
+
+            ${row.name || ""}
+
+        </div>
 
 
-    ${
+        ${
         row.alias
         ?
         `
@@ -84,17 +92,29 @@ function showRestaurantDetails(row){
         `
         :
         ""
-    }
+        }
+
+    </div>
 
 
+    <button
+    id="favoriteButton"
+    class="favorite-button">
+
+        ${row.favorite ? "❤️" : "🤍"}
+
+    </button>
+
+
+</div>
 
     <div class="detail-address">
 
-        📍 ${row.addr || ""}
+        📍 ${row.address || ""}
 
         <br>
 
-        ☎️ ${row.tel || ""}
+        ☎️ ${row.phone || ""}
 
     </div>
 
@@ -119,66 +139,60 @@ function showRestaurantDetails(row){
         ""
     }
 
+    <div class="detail-bottom-actions">
 
 
-    <div class="detail-actions">
+${
+row.phone
+?
+`
+<button
+class="detail-button"
+onclick="
+location.href='tel:${row.phone}'
+">
 
+📞 Call 
 
-        ${
-        row.tel
-        ?
-        `
-        <button
-        class="detail-button"
-        onclick="
-        location.href='tel:${row.tel}'
-        ">
-
-        ☎ Call
-
-        </button>
-        `
-        :
-        ""
-        }
-
-
-
-        <button
-        class="detail-button secondary"
-        onclick="
-        openDirections(
-        ${row.lat},
-        ${row.lon}
-        )
-        ">
-
-        🗺 Directions
-
-        </button>
+</button>
+`
+:
+""
+}
 
 
 
-    </div>
+<button
+class="detail-button secondary"
+onclick="
+openDirections(
+${row.lat},
+${row.lon}
+)
+">
+
+🧭 Directions
+
+</button>
 
 
 
+<button
+class="share-button"
+onclick="
+shareRestaurant(
+'${row.name}',
+'${row.lat}',
+'${row.lon}'
+)
+">
 
-    <button
-    class="share-button"
-    onclick="
-    shareRestaurant(
-    '${row.name}',
-    '${row.lat}',
-    '${row.lon}'
-    )
-    ">
+📤 Share 
 
-    ↗ Share
-
-    </button>
+</button>
 
 
+</div>
 
     `;
 
@@ -186,6 +200,19 @@ function showRestaurantDetails(row){
 
     panel.style.display="block";
 
+    const favoriteButton =
+        document.getElementById("favoriteButton");
+
+    favoriteButton.onclick = () => {
+
+        toggleFavorite(row.id || row.media);
+
+        favoriteButton.innerHTML =
+            isFavorite(row.id || row.media)
+                ? "❤️"
+                : "🤍";
+
+    };
 
 }
 
