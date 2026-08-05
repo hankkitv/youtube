@@ -6,372 +6,186 @@ let markerCluster;
 let baseLayers = {};
 let activeBaseLayer = null;
 
+function initializeMap() {
+  // 1. Create map FIRST
 
-function initializeMap(){
+  map = L.map("map", {
+    minZoom: 3,
 
+    maxZoom: 19,
 
-    // 1. Create map FIRST
+    zoomControl: false,
+  })
 
-    map = L.map("map", {
+    .setView([37.5638288, 126.9800428], 13);
 
-        minZoom:3,
+  // 2. Create layers
 
-        maxZoom:19,
+  createBaseLayers();
 
-        zoomControl:false
+  // 3. Restore previous layer
 
-    })
+  restoreMapLayer();
 
-    .setView(
-        [
-            37.5638288,
-            126.9800428
-        ],
-        13
-    );
+  // 4. Layer control
 
+  L.control
+    .layers(
+      baseLayers,
 
+      null,
 
-    // 2. Create layers
+      {
+        position: "topright",
 
-    createBaseLayers();
-
-
-
-    // 3. Restore previous layer
-
-    restoreMapLayer();
-
-
-
-    // 4. Layer control
-
-    L.control.layers(
-
-        baseLayers,
-
-        null,
-
-        {
-
-            position:"topright",
-
-            collapsed:true
-
-        }
-
+        collapsed: true,
+      },
     )
 
     .addTo(map);
 
+  // 5. Scale
 
+  L.control
+    .scale({
+      position: "bottomright",
 
-    // 5. Scale
-
-    L.control.scale({
-
-        position:"bottomright",
-
-        imperial:false
-
+      imperial: false,
     })
 
     .addTo(map);
 
+  // 6. Marker cluster
 
+  markerCluster = L.markerClusterGroup({
+    maxClusterRadius: 60,
 
-    // 6. Marker cluster
+    disableClusteringAtZoom: 17,
 
-    markerCluster = L.markerClusterGroup({
+    showCoverageOnHover: false,
 
-        maxClusterRadius:60,
+    spiderfyOnMaxZoom: true,
 
-        disableClusteringAtZoom:17,
+    zoomToBoundsOnClick: true,
+  });
 
-        showCoverageOnHover:false,
+  map.addLayer(markerCluster);
 
-        spiderfyOnMaxZoom:true,
+  // 7. Remember layer changes
 
-        zoomToBoundsOnClick:true
+  map.on(
+    "baselayerchange",
 
-    });
+    function (e) {
+      if (e.name === "Carto Light") {
+        localStorage.setItem("mapLayer", "carto");
+      } else if (e.name === "OSM") {
+        localStorage.setItem("mapLayer", "osm");
+      } else {
+        localStorage.setItem("mapLayer", e.name);
+      }
+    },
+  );
 
-
-
-    map.addLayer(
-        markerCluster
-    );
-
-
-
-    // 7. Remember layer changes
-
-    map.on(
-
-        "baselayerchange",
-
-        function(e){
-
-
-            if(
-                e.name === "Carto Light"
-            ){
-
-                localStorage.setItem(
-                    "mapLayer",
-                    "carto"
-                );
-
-            }
-
-
-            else if(
-                e.name === "OSM"
-            ){
-
-                localStorage.setItem(
-                    "mapLayer",
-                    "osm"
-                );
-
-            }
-
-
-            else{
-
-                localStorage.setItem(
-                    "mapLayer",
-                    e.name
-                );
-
-            }
-
-
-        }
-
-    );
-
-
-
-    return map;
-
+  return map;
 }
 
+function createBaseLayers() {
+  baseLayers["Carto Light"] = L.tileLayer(
+    "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
 
+    {
+      maxZoom: 19,
 
+      attribution: "© OpenStreetMap © CARTO",
+    },
+  );
 
+  baseLayers["OSM"] = L.tileLayer(
+    "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
 
-function createBaseLayers(){
+    {
+      maxZoom: 19,
 
+      attribution: "© OpenStreetMap",
+    },
+  );
 
+  baseLayers["OSM Humanitarian"] = L.tileLayer(
+    "https://tile-{s}.openstreetmap.fr/hot/{z}/{x}/{y}.png",
 
-    baseLayers["Carto Light"] =
+    {
+      maxZoom: 19,
 
-        L.tileLayer(
+      attribution: "© OpenStreetMap contributors",
+    },
+  );
 
-            "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+  baseLayers["Esri Streets"] = L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
 
-            {
+    {
+      maxZoom: 19,
 
-                maxZoom:19,
+      attribution: "© Esri",
+    },
+  );
 
-                attribution:
-                "© OpenStreetMap © CARTO"
+  baseLayers["Satellite"] = L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
 
-            }
+    {
+      maxZoom: 19,
 
-        );
-
-
-
-    baseLayers["OSM"] =
-
-        L.tileLayer(
-
-            "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-
-            {
-
-                maxZoom:19,
-
-                attribution:
-                "© OpenStreetMap"
-
-            }
-
-        );
-
-
-
-
-
-    baseLayers["OSM Humanitarian"] =
-
-        L.tileLayer(
-
-            "https://tile-{s}.openstreetmap.fr/hot/{z}/{x}/{y}.png",
-
-            {
-
-                maxZoom:19,
-
-                attribution:
-                "© OpenStreetMap contributors"
-
-            }
-
-        );
-
-
-
-
-
-    baseLayers["Esri Streets"] =
-
-        L.tileLayer(
-
-            "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
-
-            {
-
-                maxZoom:19,
-
-                attribution:
-                "© Esri"
-
-            }
-
-        );
-
-
-
-
-
-    baseLayers["Satellite"] =
-
-        L.tileLayer(
-
-            "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-
-            {
-
-                maxZoom:19,
-
-                attribution:
-                "© Esri"
-
-            }
-
-        );
-
-
-
+      attribution: "© Esri",
+    },
+  );
 }
 
+function restoreMapLayer() {
+  const saved = localStorage.getItem("mapLayer");
 
+  let selected = baseLayers["Carto Light"];
 
+  if (saved) {
+    switch (saved) {
+      case "osm":
+        selected = baseLayers["OSM"];
 
+        break;
 
-function restoreMapLayer(){
+      case "carto":
+        selected = baseLayers["Carto Light"];
 
+        break;
 
+      case "Satellite":
+        selected = baseLayers["Satellite"];
 
-    const saved =
+        break;
 
-        localStorage.getItem(
-            "mapLayer"
-        );
+      case "Esri Streets":
+        selected = baseLayers["Esri Streets"];
 
-
-
-    let selected =
-        baseLayers["Carto Light"];
-
-
-
-
-    if(saved){
-
-
-        switch(saved){
-
-
-            case "osm":
-
-                selected =
-                    baseLayers["OSM"];
-
-                break;
-
-
-
-            case "carto":
-
-                selected =
-                    baseLayers["Carto Light"];
-
-                break;
-
-
-
-            case "Satellite":
-
-                selected =
-                    baseLayers["Satellite"];
-
-                break;
-
-
-
-            case "Esri Streets":
-
-                selected =
-                    baseLayers["Esri Streets"];
-
-                break;
-
-
-        }
-
-
+        break;
     }
+  }
 
+  activeBaseLayer = selected;
 
-
-    activeBaseLayer = selected;
-
-
-    selected.addTo(map);
-
-
+  selected.addTo(map);
 }
 
-
-
-
-
-function getMap(){
-
-    return map;
-
+function getMap() {
+  return map;
 }
 
-
-function getMarkerCluster(){
-
-    return markerCluster;
-
+function getMarkerCluster() {
+  return markerCluster;
 }
 
+window.initializeMap = initializeMap;
 
+window.getMap = getMap;
 
-window.initializeMap =
-    initializeMap;
-
-
-window.getMap =
-    getMap;
-
-
-window.getMarkerCluster =
-    getMarkerCluster;
+window.getMarkerCluster = getMarkerCluster;

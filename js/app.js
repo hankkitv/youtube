@@ -1,44 +1,58 @@
 /* js/app.js */
 
+console.log("HankkiTV application loaded");
 
-console.log(
-    "HankkiTV application loaded"
-);
+const isLocalhost =
+  location.hostname === "localhost" ||
+  location.hostname.startsWith("192.168.") ||
+  location.hostname === "127.0.0.1";
 
+// ---------------------------------
+// Application ready event
+// ---------------------------------
 
+window.addEventListener("appReady", () => {
+  console.log("HankkiTV application ready");
 
-if(
-    "serviceWorker" in navigator
-){
+  // Future startup tasks:
+  //
+  // initializeFavorites();
+  // initializeTransit();
+  // initializeAnalytics();
+});
 
-    window.addEventListener(
-        "load",
-        ()=>{
+// ---------------------------------
+// Service worker
+// ---------------------------------
 
+if (!isLocalhost && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("./service-worker.js")
 
-            navigator.serviceWorker
-            .register(
-                "./service-worker.js"
-            )
+      .then((registration) => {
+        console.log("HankkiTV offline enabled");
 
-            .then(()=>{
+        registration.addEventListener("updatefound", () => {
+          const worker = registration.installing;
 
-                console.log(
-                    "HankkiTV offline enabled"
-                );
+          if (!worker) return;
 
-            })
+          worker.addEventListener("statechange", () => {
+            if (
+              worker.state === "activated" &&
+              navigator.serviceWorker.controller
+            ) {
+              console.log("New version installed");
 
-            .catch(err=>{
+              window.location.reload();
+            }
+          });
+        });
+      })
 
-                console.error(
-                    err
-                );
-
-            });
-
-
-        }
-    );
-
+      .catch((error) => {
+        console.error("Service worker registration failed:", error);
+      });
+  });
 }

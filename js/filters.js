@@ -1,40 +1,14 @@
 /* js/filters.js */
 
+function filterRestaurants(keyword) {
+  if (!keyword) return restaurants;
 
-function filterRestaurants(keyword){
+  keyword = keyword.toLowerCase();
 
-
-    if(!keyword)
-        return restaurants;
-
-
-
-    keyword =
-    keyword
-    .toLowerCase();
-
-
-
-    return restaurants.filter(row=>{
-
-
-        return [
-
-            row.name,
-
-            row.alias,
-
-            row.addr,
-
-            row.menu
-
-        ]
-        .join(" ")
-        .toLowerCase()
-        .includes(keyword);
-
-
-    });
-
-
+  return restaurants.filter((row) => {
+    return [row.name, row.alias, row.addr, row.menu]
+      .join(" ")
+      .toLowerCase()
+      .includes(keyword);
+  });
 }

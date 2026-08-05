@@ -1,23 +1,19 @@
 /* js/state.js */
 
 const AppState = {
+  restaurants: [],
 
-    restaurants: [],
+  markers: [],
 
-    markers: [],
+  selectedRestaurant: null,
 
-    selectedRestaurant: null,
+  searchResults: [],
 
-    searchResults: [],
+  favorites: [],
 
-    favorites: [],
+  settings: {
+    darkMode: false,
 
-    settings: {
-
-        darkMode: false,
-
-        mapType: "default"
-
-    }
-
+    mapType: "default",
+  },
 };

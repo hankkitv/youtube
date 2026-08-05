@@ -1,93 +1,61 @@
 /* js/restaurants.js */
 
-
 const restaurants = AppState.restaurants;
 const markers = AppState.markers;
 
-async function loadCSV(){
+async function loadCSV() {
+  const response = await fetch("./poi.csv");
 
-
-    const response =
-        await fetch(
-            "./poi.csv"
-        );
-
-
-    return await response.text();
-
-
+  return await response.text();
 }
 
-function loadRestaurants(){
+function loadRestaurants() {
+  return loadCSV().then((csv) => {
+    const loadedRestaurants = Papa.parse(csv, {
+      header: true,
+      dynamicTyping: true,
+    })
+      .data.filter((row) => row.lat && row.lon)
+      .map((row) => ({
+        id: row.media,
 
+        name: row.name,
 
-    return loadCSV()
-    .then(csv=>{
+        alias: row.alias,
 
+        address: row.addr,
 
-        const loadedRestaurants =
-            Papa.parse(csv,
-                {
-                    header:true,
-                    dynamicTyping:true
-                })
-                .data
-                .filter(row => row.lat && row.lon)
-                .map(row => ({
+        lat: row.lat,
 
-                    id: row.media,
+        lon: row.lon,
 
-                    name: row.name,
+        phone: row.tel,
 
-                    alias: row.alias,
+        link: row.link,
 
-                    address: row.addr,
+        menu: row.menu,
 
-                    lat: row.lat,
+        flag: row.flag,
 
-                    lon: row.lon,
+        youtubeId: row.media,
 
-                    phone: row.tel,
+        thumbnail: `https://i.ytimg.com/vi/${row.media}/hqdefault.jpg`,
 
-                    link: row.link,
+        favorite: isFavorite(row.media),
+      }));
 
-                    menu: row.menu,
+    restaurants.push(...loadedRestaurants);
 
-                    flag: row.flag,
+    restaurants.forEach((restaurant) => {
+      const marker = createRestaurantMarker(restaurant);
 
-                    youtubeId: row.media,
+      restaurant.marker = marker;
 
-                    thumbnail:
-                        `https://i.ytimg.com/vi/${row.media}/hqdefault.jpg`,
+      markers.push(marker);
 
-                    favorite:
-                        isFavorite(row.media)
-
-                }));
-
-
-        restaurants.push(...loadedRestaurants);
-
-
-        restaurants.forEach(restaurant => {
-
-            const marker =
-                createRestaurantMarker(restaurant);
-
-            restaurant.marker = marker;
-
-            markers.push(marker);
-
-            getMarkerCluster().addLayer(marker);
-
-        });
-
-
-        buildSearchIndex(
-            restaurants
-        );
-
-
+      getMarkerCluster().addLayer(marker);
     });
 
+    buildSearchIndex(restaurants);
+  });
 }

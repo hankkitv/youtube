@@ -1,241 +1,152 @@
 /* js/preloader.js */
 
-
 const Loader = {
+  update(message, percent) {
+    const text = document.getElementById("loaderText");
 
+    const bar = document.getElementById("loaderProgress");
 
-    update(message, percent){
-
-
-        const text =
-            document.getElementById(
-                "loaderText"
-            );
-
-
-        const bar =
-            document.getElementById(
-                "loaderProgress"
-            );
-
-
-        if(text){
-
-            text.textContent =
-                message;
-
-        }
-
-
-        if(bar){
-
-            bar.style.width =
-                percent + "%";
-
-        }
-
-    },
-
-
-
-    hide(){
-
-
-        const loader =
-            document.getElementById(
-                "appLoader"
-            );
-
-
-        if(loader){
-
-            loader.classList.add(
-                "loaded"
-            );
-
-            setTimeout(()=>{
-
-                loader.remove();
-
-            },500);
-
-        }
-
+    if (text) {
+      text.textContent = message;
     }
 
+    if (bar) {
+      bar.style.width = percent + "%";
+    }
+  },
+
+  hide() {
+    const loader = document.getElementById("appLoader");
+
+    if (loader) {
+      loader.classList.add("loaded");
+
+      setTimeout(() => {
+        loader.remove();
+      }, 500);
+    }
+  },
 };
 
+async function waitFor(condition, timeout = 10000) {
+  const start = Date.now();
 
-
-
-
-async function waitFor(condition, timeout=10000){
-
-
-    const start =
-        Date.now();
-
-
-
-    while(
-        !condition()
-    ){
-
-
-        if(
-            Date.now() - start > timeout
-        ){
-
-            throw new Error(
-                "Library loading timeout"
-            );
-
-        }
-
-
-        await new Promise(
-            resolve =>
-            setTimeout(resolve,100)
-        );
-
+  while (!condition()) {
+    if (Date.now() - start > timeout) {
+      throw new Error("Library loading timeout");
     }
 
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
 }
 
+let appStarted = false;
 
+async function bootApplication() {
+  if (appStarted) {
+    console.warn("Application already started");
 
+    return;
+  }
 
+  appStarted = true;
 
-async function bootApplication(){
+  const startTime = Date.now();
 
-    const startTime =
-        Date.now();
+  try {
+    // -----------------------------
+    // 1. Verify external libraries
+    // -----------------------------
 
-    try{
+    Loader.update("Loading Leaflet...", 20);
 
+    await waitFor(() => window.L);
 
-        Loader.update(
-            "Loading Leaflet...",
-            20
-        );
+    Loader.update("Loading marker system...", 35);
 
+    await waitFor(() => window.L && L.markerClusterGroup);
 
-        await waitFor(
-            ()=>window.L
-        );
+    // -----------------------------
+    // 2. Initialize map
+    // -----------------------------
 
+    Loader.update("Starting map...", 50);
 
+    await waitFor(() => typeof initializeMap === "function");
 
-        Loader.update(
-            "Loading marker system...",
-            40
-        );
+    initializeMap();
 
+    // -----------------------------
+    // 3. Load restaurant data
+    // -----------------------------
 
-        await waitFor(
-            ()=>window.L &&
-                L.markerClusterGroup
-        );
+    Loader.update("Loading restaurants...", 70);
 
+    await waitFor(() => typeof loadRestaurants === "function");
 
+    await loadRestaurants();
 
-        Loader.update(
-            "Starting map...",
-            60
-        );
+    // -----------------------------
+    // 4. Initialize UI
+    // -----------------------------
 
+    Loader.update("Preparing search...", 85);
 
-        await waitFor(
-            ()=>typeof initializeMap === "function"
-        );
+    await waitFor(() => typeof initializeSearch === "function");
 
+    initializeSearch();
 
+    if (typeof initializeLocation === "function") {
+      Loader.update("Preparing location...", 90);
 
-        initializeMap();
-
-
-
-        Loader.update(
-            "Loading restaurants...",
-            80
-        );
-
-
-        await loadRestaurants();
-
-
-
-        Loader.update(
-            "Preparing search...",
-            90
-        );
-
-
-        initializeSearch();
-
-
-
-        if(
-            typeof initializeLocation === "function"
-        ){
-
-            initializeLocation();
-
-        }
-
-
-
-        const elapsed =
-            Date.now() - startTime;
-
-
-        const minimumTime = 800;
-
-
-        if(elapsed < minimumTime){
-
-            await new Promise(
-                resolve =>
-                setTimeout(
-                    resolve,
-                    minimumTime - elapsed
-                )
-            );
-
-        }
-
-
-        Loader.hide();
-
-
-
+      initializeLocation();
     }
 
+    // -----------------------------
+    // 5. Restore shared links
+    // -----------------------------
 
-    catch(error){
+    Loader.update("Opening restaurant...", 95);
 
+    if (
+      typeof getPlaceFromURL === "function" &&
+      typeof openRestaurantById === "function"
+    ) {
+      const place = getPlaceFromURL();
 
-        console.error(
-            "Application startup failed:",
-            error
-        );
-
-
-        Loader.update(
-            "Unable to load application",
-            100
-        );
-
-
+      if (place) {
+        setTimeout(() => {
+          openRestaurantById(place);
+        }, 100);
+      }
     }
 
+    // -----------------------------
+    // 6. Minimum loader duration
+    // -----------------------------
 
+    const elapsed = Date.now() - startTime;
+
+    const minimumTime = 800;
+
+    if (elapsed < minimumTime) {
+      await new Promise((resolve) =>
+        setTimeout(resolve, minimumTime - elapsed),
+      );
+    }
+
+    Loader.hide();
+    window.dispatchEvent(
+        new Event("appReady")
+    );
+    
+  } catch (error) {
+    console.error("Application startup failed:", error);
+
+    Loader.update("Unable to load application", 100);
+
+    appStarted = false;
+  }
 }
 
-
-
-
-window.addEventListener(
-    "DOMContentLoaded",
-    bootApplication
-);
+window.addEventListener("DOMContentLoaded", bootApplication);

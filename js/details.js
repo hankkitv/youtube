@@ -1,12 +1,9 @@
 /* js/details.js */
 
+function youtubePlayer(videoId) {
+  if (!videoId) return "";
 
-function youtubePlayer(videoId){
-
-    if(!videoId)
-        return "";
-
-    return `
+  return `
     <div class="video-fullbleed">
     <iframe
         src="https://www.youtube.com/embed/${videoId}"
@@ -19,104 +16,51 @@ function youtubePlayer(videoId){
     </div>
 
     `;
-
 }
 
+function parseMenu(menu) {
+  if (!menu) return "";
 
-
-function parseMenu(menu){
-
-    if(!menu)
-        return "";
-
-    return menu
-        .split("|")
-        .map(item=>item.trim())
-        .join("<br>");
-
+  return menu
+    .split("|")
+    .map((item) => item.trim())
+    .join("<br>");
 }
 
-function updateSEO(row){
+function updateSEO(row) {
+  const title = `${row.name} | HankkiTV`;
 
+  document.title = title;
 
-    const title =
-        `${row.name} | HankkiTV`;
+  const description = row.address || "Discover restaurants with HankkiTV";
 
+  document.getElementById("ogTitle")?.setAttribute("content", title);
 
-    document.title =
-        title;
-
-
-
-    const description =
-        row.address ||
-        "Discover restaurants with HankkiTV";
-
-
-
-    document
-    .getElementById("ogTitle")
-    ?.setAttribute(
-        "content",
-        title
-    );
-
-
-    document
+  document
     .getElementById("ogDescription")
-    ?.setAttribute(
-        "content",
-        description
-    );
+    ?.setAttribute("content", description);
 
-
-    document
+  document
     .getElementById("ogImage")
-    ?.setAttribute(
-        "content",
-        row.thumbnail || "favicon.png"
-    );
+    ?.setAttribute("content", row.thumbnail || "favicon.png");
 
-
-    document
+  document
     .getElementById("ogUrl")
-    ?.setAttribute(
-        "content",
-        window.location.href
-    );
-
-
+    ?.setAttribute("content", window.location.href);
 }
 
+function showRestaurantDetails(row) {
+  updateSEO(row);
 
-function showRestaurantDetails(row){
+  const panel = document.getElementById("restaurantDetails");
 
-    updateSEO(row);
+  const content = document.getElementById("detailContent");
 
-    const panel =
-        document.getElementById(
-            "restaurantDetails"
-        );
-
-
-    const content =
-        document.getElementById(
-            "detailContent"
-        );
-
-
-
-    content.innerHTML = `
+  content.innerHTML = `
 
     <div class="video-container">
 
-    ${
-        row.youtubeId
-        ?
-        youtubePlayer(row.youtubeId)
-        :
-        ""
-    }
+    ${row.youtubeId ? youtubePlayer(row.youtubeId) : ""}
     </div>
 
     <div class="detail-handle"></div>
@@ -134,15 +78,13 @@ function showRestaurantDetails(row){
 
 
         ${
-        row.alias
-        ?
-        `
+          row.alias
+            ? `
         <div class="detail-alias">
             ${row.alias}
         </div>
         `
-        :
-        ""
+            : ""
         }
 
     </div>
@@ -173,9 +115,8 @@ function showRestaurantDetails(row){
 
 
     ${
-        row.menu
-        ?
-        `
+      row.menu
+        ? `
         <div class="detail-menu">
 
             🍽 Menu
@@ -186,17 +127,15 @@ function showRestaurantDetails(row){
 
         </div>
         `
-        :
-        ""
+        : ""
     }
 
     <div class="detail-bottom-actions">
 
 
 ${
-row.phone
-?
-`
+  row.phone
+    ? `
 <button
 class="detail-button"
 onclick="
@@ -207,8 +146,7 @@ location.href='tel:${row.phone}'
 
 </button>
 `
-:
-""
+    : ""
 }
 
 
@@ -246,208 +184,82 @@ shareRestaurant(
 
     `;
 
+  panel.style.display = "block";
 
+  const favoriteButton = document.getElementById("favoriteButton");
 
-    panel.style.display="block";
+  favoriteButton.onclick = () => {
+    toggleFavorite(row.id || row.media);
 
-    const favoriteButton =
-        document.getElementById("favoriteButton");
-
-    favoriteButton.onclick = () => {
-
-        toggleFavorite(row.id || row.media);
-
-        favoriteButton.innerHTML =
-            isFavorite(row.id || row.media)
-                ? "❤️"
-                : "🤍";
-
-    };
-
+    favoriteButton.innerHTML = isFavorite(row.id || row.media) ? "❤️" : "🤍";
+  };
 }
 
-
-
-
-
-function openDirections(lat,lon){
-
-    window.open(
-        `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`
-    );
-
+function openDirections(lat, lon) {
+  window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lon}`);
 }
 
+// share location even if the share, clipboard permission is denied
+async function shareRestaurant(id, name) {
+  const url = APP_CONFIG.baseURL + "?place=" + encodeURIComponent(id);
 
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: `${name} | HankkiTV`,
 
+        text: "Discover this restaurant on HankkiTV",
 
-
-async function shareRestaurant(
-    id,
-    name
-){
-
-    const url =
-        APP_CONFIG.baseURL +
-        "?place=" +
-        encodeURIComponent(id);
-
-
-    if(
-        navigator.share
-    ){
-
-        try{
-
-            await navigator.share({
-
-                title:
-                    `${name} | HankkiTV`,
-
-                text:
-                    "Discover this restaurant on HankkiTV",
-
-                url:url
-
-            });
-
-        }
-
-        catch(err){
-
-            if(
-                err.name !== "AbortError"
-            ){
-
-                console.error(
-                    "Share failed:",
-                    err
-                );
-
-            }
-
-        }
-
-
-        return;
-
+        url: url,
+      });
+    } catch (err) {
+      if (err.name !== "AbortError") {
+        console.error("Share failed:", err);
+      }
     }
 
+    return;
+  }
 
+  // Clipboard fallback
 
-    // Clipboard fallback
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(url);
 
-    try{
+      alert("Link copied");
+    } else {
+      // Older browser fallback
 
+      const input = document.createElement("textarea");
 
-        if(
-            navigator.clipboard &&
-            window.isSecureContext
-        ){
+      input.value = url;
 
-            await navigator.clipboard.writeText(
-                url
-            );
+      input.style.position = "fixed";
 
+      input.style.opacity = "0";
 
-            alert(
-                "Link copied"
-            );
+      document.body.appendChild(input);
 
+      input.select();
 
-        }
+      document.execCommand("copy");
 
-        else{
+      input.remove();
 
-
-            // Older browser fallback
-
-            const input =
-                document.createElement(
-                    "textarea"
-                );
-
-
-            input.value =
-                url;
-
-
-            input.style.position =
-                "fixed";
-
-
-            input.style.opacity =
-                "0";
-
-
-            document.body.appendChild(
-                input
-            );
-
-
-            input.select();
-
-
-            document.execCommand(
-                "copy"
-            );
-
-
-            input.remove();
-
-
-            alert(
-                "Link copied"
-            );
-
-        }
-
-
+      alert("Link copied");
     }
+  } catch (err) {
+    console.error("Copy failed:", err);
 
-    catch(err){
-
-        console.error(
-            "Copy failed:",
-            err
-        );
-
-
-        alert(
-            "Please copy this link:\n\n" +
-            url
-        );
-
-    }
-
+    alert("Please copy this link:\n\n" + url);
+  }
 }
 
-
-
-function hideRestaurantDetails(){
-
-    document
-    .getElementById(
-        "restaurantDetails"
-    )
-    .style.display="none";
-
+function hideRestaurantDetails() {
+  document.getElementById("restaurantDetails").style.display = "none";
 }
 
-
-
-
-document.addEventListener(
-"DOMContentLoaded",
-()=>{
-
-
-document
-.getElementById(
-"closeDetails"
-)
-.onclick =
-hideRestaurantDetails;
-
-
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("closeDetails").onclick = hideRestaurantDetails;
 });

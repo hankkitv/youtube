@@ -1,66 +1,39 @@
 /* js/navigation.js */
 
-function focusRestaurant(
-    restaurant,
-    options = {}
-){
+function focusRestaurant(restaurant, options = {}) {
+  if (!restaurant) return;
 
-    if(!restaurant)
-        return;
+  AppState.selectedRestaurant = restaurant;
 
-    AppState.selectedRestaurant =
-        restaurant;
+  updateSelectedSearchResult();
+  // if(currentResults.length){
 
-    updateSelectedSearchResult();
-    // if(currentResults.length){
+  //     renderSearchResults(
+  //         currentResults
+  //     );
 
-    //     renderSearchResults(
-    //         currentResults
-    //     );
+  // }
+  if (options.updateURL !== false) {
+    updateRestaurantURL(restaurant.id);
+  }
 
-    // }
-    if(options.updateURL !== false){
+  markerCluster.zoomToShowLayer(
+    restaurant.marker,
 
-        updateRestaurantURL(
-            restaurant.id
-        );
+    () => {
+      map.flyTo(
+        [restaurant.lat, restaurant.lon],
 
-    }
+        options.zoom ?? 17,
 
+        {
+          duration: 0.6,
+        },
+      );
 
-    markerCluster.zoomToShowLayer(
+      selectMarker(restaurant.marker);
 
-        restaurant.marker,
-
-        ()=>{
-
-            map.flyTo(
-
-                [
-                    restaurant.lat,
-                    restaurant.lon
-                ],
-
-                options.zoom ?? 17,
-
-                {
-                    duration:.6
-                }
-
-            );
-
-
-            selectMarker(
-                restaurant.marker
-            );
-
-
-            showRestaurantDetails(
-                restaurant
-            );
-
-        }
-
-    );
-
+      showRestaurantDetails(restaurant);
+    },
+  );
 }
