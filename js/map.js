@@ -1,547 +1,56 @@
 /* js/map.js */
 
-/*
-    HankkiTV Restaurant Map
-    Leaflet map management
-
-    Features:
-    - Persistent map position
-    - Persistent basemap selection
-    - Marker cluster integration
-    - Layer control refactor
-*/
-
-
 let map;
-
 let markerCluster;
 
+let baseLayers = {};
+let activeBaseLayer = null;
 
-/*
-    Base layers
-    Defined globally so they can be restored
-    from localStorage
-*/
-
-let cartoLight;
-
-let osmLayer;
-
-let esriStreet;
-
-let satelliteLayer;
-
-let topoLayer;
-
-
-/*
-    Optional overlays
-*/
-
-let transitLayer;
-
-
-/*
-    Storage keys
-*/
-
-const MAP_LAYER_KEY =
-    "hankkitv_map_layer";
-
-const MAP_STATE_KEY =
-    "hankkitv_map_state";
-
-
-
-/*
-    Main initializer
-
-    Called from app.js
-*/
 
 function initializeMap(){
 
 
-    createMap();
+    // 1. Create map FIRST
 
+    map = L.map("map", {
 
-    createMarkerCluster();
+        minZoom:3,
 
+        maxZoom:19,
 
-    createLayers();
+        zoomControl:false
 
-
-    restoreMapState();
-
-
-    createLayerControl();
-
-
-    installMapEvents();
-
-
-    return map;
-
-}
-
-
-
-/*
-    Create Leaflet map
-
-*/
-
-function createMap(){
-
-
-    map =
-        L.map(
-            "map",
-            {
-                minZoom:3,
-
-                maxZoom:19,
-
-                zoomControl:false
-            }
-        );
-
-
-    // /*
-    //     Put zoom control below
-    //     layer button
-    // */
-
-    // L.control.zoom(
-    //     {
-    //         position:"topright"
-    //     }
-    // )
-    // .addTo(map);
-
-    L.control.scale(
-    {
-        position: "bottomright",
-
-        metric: true,
-
-        imperial: false,
-
-        maxWidth: 150
     })
-    .addTo(map);
-}
 
-
-
-
-/*
-    Restaurant marker cluster
-
-    markers.js and restaurants.js
-    already expect this variable
-*/
-
-function createMarkerCluster(){
-
-
-    markerCluster =
-        L.markerClusterGroup(
-            {
-                maxClusterRadius:60,
-
-                disableClusteringAtZoom:17,
-
-                showCoverageOnHover:false,
-
-                spiderfyOnMaxZoom:true,
-
-                zoomToBoundsOnClick:true
-            }
-        );
-
-
-    /*
-        Restaurants are always visible.
-
-        They are intentionally NOT
-        included in the layer control.
-    */
-
-    map.addLayer(
-        markerCluster
-    );
-
-}
-
-
-
-
-/*
-    Restore previous map location
-
-    If user has never visited,
-    use Seoul default view.
-*/
-
-function restoreMapState(){
-
-
-    const saved =
-        localStorage.getItem(
-            MAP_STATE_KEY
-        );
-
-
-    if(saved){
-
-
-        try {
-
-
-            const state =
-                JSON.parse(saved);
-
-
-            map.setView(
-
-                [
-                    state.lat,
-                    state.lng
-                ],
-
-                state.zoom
-
-            );
-
-
-            return;
-
-
-        }
-        catch(error){
-
-
-            console.warn(
-                "Invalid saved map state",
-                error
-            );
-
-
-        }
-
-
-    }
-
-
-    /*
-        Default location
-        Seoul
-    */
-
-
-    map.setView(
-
+    .setView(
         [
             37.5638288,
             126.9800428
         ],
-
         13
-
     );
 
 
-}
 
+    // 2. Create layers
 
+    createBaseLayers();
 
 
-/*
-    Save current map position
 
-*/
+    // 3. Restore previous layer
 
-function saveMapState(){
+    restoreMapLayer();
 
 
-    const center =
-        map.getCenter();
 
-
-    localStorage.setItem(
-
-        MAP_STATE_KEY,
-
-        JSON.stringify(
-            {
-                lat:center.lat,
-
-                lng:center.lng,
-
-                zoom:map.getZoom()
-            }
-        )
-
-    );
-
-}
-/*
-    Create all map layers
-*/
-
-function createLayers(){
-
-
-    /*
-        Carto Light
-
-        Default choice:
-        clean, readable,
-        good for restaurant discovery
-    */
-
-    cartoLight =
-        L.tileLayer(
-
-            "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-
-            {
-                maxZoom:19,
-
-                attribution:
-                "© OpenStreetMap © CARTO"
-            }
-
-        );
-
-
-
-
-    /*
-        OpenStreetMap Standard
-    */
-
-    osmLayer =
-        L.tileLayer(
-
-            "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-
-            {
-                maxZoom:19,
-
-                attribution:
-                "© OpenStreetMap contributors"
-            }
-
-        );
-
-
-
-
-    /*
-        Esri Street Map
-    */
-
-    esriStreet =
-        L.tileLayer(
-
-            "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
-
-            {
-                maxZoom:19,
-
-                attribution:
-                "© Esri"
-            }
-
-        );
-
-
-
-
-    /*
-        Esri Satellite
-
-        Useful for checking
-        building entrances
-    */
-
-    satelliteLayer =
-        L.tileLayer(
-
-            "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-
-            {
-                maxZoom:19,
-
-                attribution:
-                "© Esri"
-            }
-
-        );
-
-
-
-
-    /*
-        OpenTopoMap
-
-        Alternative readable map
-        without Carto Dark
-    */
-
-    topoLayer =
-        L.tileLayer(
-
-            "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
-
-            {
-                maxZoom:17,
-
-                attribution:
-                "© OpenTopoMap contributors"
-            }
-
-        );
-
-
-
-    /*
-        Default layer
-
-        Only add if no saved
-        layer exists
-    */
-
-    restoreBaseLayer();
-
-}
-
-
-
-
-/*
-    Restore last selected basemap
-*/
-
-function restoreBaseLayer(){
-
-
-    const saved =
-        localStorage.getItem(
-            MAP_LAYER_KEY
-        );
-
-
-
-    switch(saved){
-
-
-        case "osm":
-
-            osmLayer.addTo(map);
-
-            break;
-
-
-
-        case "esri":
-
-            esriStreet.addTo(map);
-
-            break;
-
-
-
-        case "satellite":
-
-            satelliteLayer.addTo(map);
-
-            break;
-
-
-
-        case "topo":
-
-            topoLayer.addTo(map);
-
-            break;
-
-
-
-        case "carto":
-
-        default:
-
-            cartoLight.addTo(map);
-
-            break;
-
-    }
-
-}
-
-
-
-
-/*
-    Layer selection button
-
-    collapsed:true gives the
-    normal Leaflet layer icon
-*/
-
-function createLayerControl(){
-
-
-
-    transitLayer =
-        L.layerGroup();
-
-
-
-    const baseLayers = {
-
-
-        "Carto Light":
-            cartoLight,
-
-
-        "OpenStreetMap":
-            osmLayer,
-
-
-        "Esri World Street":
-            esriStreet,
-
-
-        "Satellite":
-            satelliteLayer,
-
-
-        "OpenTopoMap":
-            topoLayer
-
-    };
-
-
-
-    const overlays = {
-
-
-        "Transit Stops":
-            transitLayer
-
-    };
-
-
+    // 4. Layer control
 
     L.control.layers(
 
         baseLayers,
 
-        overlays,
+        null,
 
         {
 
@@ -555,56 +64,47 @@ function createLayerControl(){
 
     .addTo(map);
 
-    /*
-    Add zoom AFTER layer control
-
-    Leaflet places newer controls
-    lower in the stack.
-    */
-
-    // L.control.zoomslider(
-    // {
-    //     position:"topright"
-    // }
-    // )
-    // .addTo(map);
-
-}
-/*
-    Install map event handlers
-*/
-
-function installMapEvents(){
 
 
-    /*
-        Remember map position
-    */
+    // 5. Scale
 
-    map.on(
+    L.control.scale({
 
-        "moveend",
+        position:"bottomright",
 
-        saveMapState
+        imperial:false
 
+    })
+
+    .addTo(map);
+
+
+
+    // 6. Marker cluster
+
+    markerCluster = L.markerClusterGroup({
+
+        maxClusterRadius:60,
+
+        disableClusteringAtZoom:17,
+
+        showCoverageOnHover:false,
+
+        spiderfyOnMaxZoom:true,
+
+        zoomToBoundsOnClick:true
+
+    });
+
+
+
+    map.addLayer(
+        markerCluster
     );
 
 
 
-    map.on(
-
-        "zoomend",
-
-        saveMapState
-
-    );
-
-
-
-
-    /*
-        Remember selected basemap
-    */
+    // 7. Remember layer changes
 
     map.on(
 
@@ -613,87 +113,36 @@ function installMapEvents(){
         function(e){
 
 
-            switch(e.name){
-
-
-                case "Carto Light":
-
-                    saveBaseLayer(
-                        "carto"
-                    );
-
-                    break;
-
-
-
-                case "OpenStreetMap":
-
-                    saveBaseLayer(
-                        "osm"
-                    );
-
-                    break;
-
-
-
-                case "Esri World Street":
-
-                    saveBaseLayer(
-                        "esri"
-                    );
-
-                    break;
-
-
-
-                case "Satellite":
-
-                    saveBaseLayer(
-                        "satellite"
-                    );
-
-                    break;
-
-
-
-                case "OpenTopoMap":
-
-                    saveBaseLayer(
-                        "topo"
-                    );
-
-                    break;
-
-            }
-
-
-        }
-
-    );
-
-
-
-
-    /*
-        Transit checkbox
-
-        Load data only when
-        user requests it.
-    */
-
-
-    map.on(
-
-        "overlayadd",
-
-        function(e){
-
-
             if(
-                e.name === "Transit Stops"
+                e.name === "Carto Light"
             ){
 
-                loadTransitLayer();
+                localStorage.setItem(
+                    "mapLayer",
+                    "carto"
+                );
+
+            }
+
+
+            else if(
+                e.name === "OSM"
+            ){
+
+                localStorage.setItem(
+                    "mapLayer",
+                    "osm"
+                );
+
+            }
+
+
+            else{
+
+                localStorage.setItem(
+                    "mapLayer",
+                    e.name
+                );
 
             }
 
@@ -704,83 +153,116 @@ function installMapEvents(){
 
 
 
-}
-
-
-
-
-/*
-    Save basemap choice
-*/
-
-function saveBaseLayer(name){
-
-
-    localStorage.setItem(
-
-        MAP_LAYER_KEY,
-
-        name
-
-    );
+    return map;
 
 }
 
 
 
 
-/*
-    Transit loader
 
-    Placeholder for future:
-
-    - Seoul Open API
-    - GTFS
-    - OpenStreetMap Overpass
-
-*/
-
-let transitLoaded = false;
+function createBaseLayers(){
 
 
 
-async function loadTransitLayer(){
+    baseLayers["Carto Light"] =
 
+        L.tileLayer(
 
-    if(transitLoaded){
+            "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
 
-        return;
+            {
 
-    }
+                maxZoom:19,
 
+                attribution:
+                "© OpenStreetMap © CARTO"
 
-    transitLoaded = true;
+            }
 
-
-
-    /*
-        Example future usage:
-
-        const response =
-            await fetch(
-              "transit.geojson"
-            );
-
-
-        const data =
-            await response.json();
-
-
-        L.geoJSON(data)
-          .addTo(transitLayer);
-
-    */
+        );
 
 
 
-    console.log(
-        "Transit layer enabled. Data loader ready."
-    );
+    baseLayers["OSM"] =
+
+        L.tileLayer(
+
+            "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+
+            {
+
+                maxZoom:19,
+
+                attribution:
+                "© OpenStreetMap"
+
+            }
+
+        );
+
+
+
+
+
+    baseLayers["OSM Humanitarian"] =
+
+        L.tileLayer(
+
+            "https://tile-{s}.openstreetmap.fr/hot/{z}/{x}/{y}.png",
+
+            {
+
+                maxZoom:19,
+
+                attribution:
+                "© OpenStreetMap contributors"
+
+            }
+
+        );
+
+
+
+
+
+    baseLayers["Esri Streets"] =
+
+        L.tileLayer(
+
+            "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+
+            {
+
+                maxZoom:19,
+
+                attribution:
+                "© Esri"
+
+            }
+
+        );
+
+
+
+
+
+    baseLayers["Satellite"] =
+
+        L.tileLayer(
+
+            "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+
+            {
+
+                maxZoom:19,
+
+                attribution:
+                "© Esri"
+
+            }
+
+        );
 
 
 
@@ -789,111 +271,107 @@ async function loadTransitLayer(){
 
 
 
-/*
-    Utility:
-    remove transit layer
-    if needed later
-*/
 
-function clearTransitLayer(){
-
-
-    transitLayer.clearLayers();
-
-
-}
+function restoreMapLayer(){
 
 
 
+    const saved =
 
-/*
-    Utility:
-    programmatically switch map style
-
-    Example:
-
-    setMapLayer("satellite")
-
-*/
-
-function setMapLayer(name){
+        localStorage.getItem(
+            "mapLayer"
+        );
 
 
 
-    const layers = {
-
-
-        carto:
-            cartoLight,
-
-
-        osm:
-            osmLayer,
-
-
-        esri:
-            esriStreet,
-
-
-        satellite:
-            satelliteLayer,
-
-
-        topo:
-            topoLayer
-
-    };
+    let selected =
+        baseLayers["Carto Light"];
 
 
 
-    const selected =
-        layers[name];
+
+    if(saved){
+
+
+        switch(saved){
+
+
+            case "osm":
+
+                selected =
+                    baseLayers["OSM"];
+
+                break;
 
 
 
-    if(!selected){
+            case "carto":
 
-        return;
+                selected =
+                    baseLayers["Carto Light"];
 
-    }
-
-
-
-    Object.values(layers)
-
-    .forEach(layer=>{
+                break;
 
 
-        if(map.hasLayer(layer)){
 
-            map.removeLayer(layer);
+            case "Satellite":
+
+                selected =
+                    baseLayers["Satellite"];
+
+                break;
+
+
+
+            case "Esri Streets":
+
+                selected =
+                    baseLayers["Esri Streets"];
+
+                break;
+
 
         }
 
-    });
 
+    }
+
+
+
+    activeBaseLayer = selected;
 
 
     selected.addTo(map);
 
 
-
-    saveBaseLayer(name);
-
-
-
 }
 
 
 
-/*
-    Expose map getter
 
-    Useful for debugging
-*/
 
 function getMap(){
 
     return map;
 
 }
+
+
+function getMarkerCluster(){
+
+    return markerCluster;
+
+}
+
+
+
+window.initializeMap =
+    initializeMap;
+
+
+window.getMap =
+    getMap;
+
+
+window.getMarkerCluster =
+    getMarkerCluster;

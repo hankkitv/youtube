@@ -1,44 +1,11 @@
 /* js/app.js */
 
 
-$(async function(){
+console.log(
+    "HankkiTV application loaded"
+);
 
 
-    initializeMap();
-
-
-    await loadRestaurants();
-
-
-    initializeSearch();
-
-    if (typeof initializeLocation === "function") {
-
-        initializeLocation();
-
-    }
-    else {
-
-        console.error(
-            "location.js failed to load"
-        );
-
-    }
-
-    const place =
-        getPlaceFromURL();
-
-
-    if(place){
-
-        openRestaurantById(
-            place
-        );
-
-    }
-
-
-});
 
 if(
     "serviceWorker" in navigator

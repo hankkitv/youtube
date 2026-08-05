@@ -78,7 +78,7 @@ function loadRestaurants(){
 
             markers.push(marker);
 
-            markerCluster.addLayer(marker);
+            getMarkerCluster().addLayer(marker);
 
         });
 

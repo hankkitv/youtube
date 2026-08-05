@@ -27,7 +27,7 @@ content="logo_t.png" id="ogImage">
 
 <meta name="twitter:card" content="summary_large_image">
 
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#2563eb">
 
 <link rel="preconnect"
@@ -60,6 +60,23 @@ src="https://unpkg.com/leaflet.zoomslider/src/L.Control.Zoomslider.js">
 </head>
 
 <body>
+    <div id="appLoader">
+
+    <div class="loaderBox">
+
+        <img src="logo_t.png">
+
+        <div id="loaderText">
+            Loading map...
+        </div>
+
+        <div class="loaderBar">
+            <div id="loaderProgress"></div>
+        </div>
+
+    </div>
+
+</div>
 
 <div id="map"></div>
 
@@ -111,6 +128,7 @@ autocomplete="off">
 
 </div>
 
+<script src="js/preloader.js"></script>
 <script src="js/config.js"></script>
 <script src="js/state.js"></script>
 <script src="js/router.js"></script>

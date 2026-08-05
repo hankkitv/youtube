@@ -283,43 +283,144 @@ function openDirections(lat,lon){
 
 
 async function shareRestaurant(
-id,
-name
+    id,
+    name
 ){
 
     const url =
         APP_CONFIG.baseURL +
         "?place=" +
-        id;
+        encodeURIComponent(id);
 
 
     if(
         navigator.share
     ){
 
-        await navigator.share({
+        try{
 
-            title:name,
+            await navigator.share({
 
-            url:url
+                title:
+                    `${name} | HankkiTV`,
 
-        });
+                text:
+                    "Discover this restaurant on HankkiTV",
+
+                url:url
+
+            });
+
+        }
+
+        catch(err){
+
+            if(
+                err.name !== "AbortError"
+            ){
+
+                console.error(
+                    "Share failed:",
+                    err
+                );
+
+            }
+
+        }
+
+
+        return;
 
     }
-    else{
 
-        navigator.clipboard
-        .writeText(url);
+
+
+    // Clipboard fallback
+
+    try{
+
+
+        if(
+            navigator.clipboard &&
+            window.isSecureContext
+        ){
+
+            await navigator.clipboard.writeText(
+                url
+            );
+
+
+            alert(
+                "Link copied"
+            );
+
+
+        }
+
+        else{
+
+
+            // Older browser fallback
+
+            const input =
+                document.createElement(
+                    "textarea"
+                );
+
+
+            input.value =
+                url;
+
+
+            input.style.position =
+                "fixed";
+
+
+            input.style.opacity =
+                "0";
+
+
+            document.body.appendChild(
+                input
+            );
+
+
+            input.select();
+
+
+            document.execCommand(
+                "copy"
+            );
+
+
+            input.remove();
+
+
+            alert(
+                "Link copied"
+            );
+
+        }
+
+
+    }
+
+    catch(err){
+
+        console.error(
+            "Copy failed:",
+            err
+        );
+
 
         alert(
-            "Link copied"
+            "Please copy this link:\n\n" +
+            url
         );
 
     }
 
 }
-
-
 
 
 

@@ -1143,3 +1143,97 @@ body {
     }
 
 }
+
+#appLoader {
+
+    position:fixed;
+
+    inset:0;
+
+    background:#ffffff;
+
+    z-index:99999;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    transition:
+        opacity .5s ease;
+
+}
+
+
+
+#appLoader.loaded {
+
+    opacity:0;
+
+    pointer-events:none;
+
+}
+
+
+
+.loaderBox {
+
+    text-align:center;
+
+    width:220px;
+
+}
+
+
+
+.loaderBox img {
+
+    width:70px;
+
+    height:70px;
+
+    margin-bottom:20px;
+
+}
+
+
+
+#loaderText {
+
+    font-size:15px;
+
+    color:#444;
+
+    margin-bottom:15px;
+
+}
+
+
+
+.loaderBar {
+
+    height:6px;
+
+    background:#e5e7eb;
+
+    border-radius:10px;
+
+    overflow:hidden;
+
+}
+
+
+
+#loaderProgress {
+
+    height:100%;
+
+    width:0;
+
+    background:#2563eb;
+
+    transition:
+        width .3s ease;
+
+}
