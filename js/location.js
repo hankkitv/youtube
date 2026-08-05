@@ -5,44 +5,107 @@ let userLocation = null;
 
 let userMarker = null;
 
-
+let userAccuracyCircle = null;
 
 function initializeLocation(){
 
 
-    const button =
-        document.createElement("button");
+    const LocationControl =
+        L.Control.extend({
+
+            options:{
+                position:"bottomright"
+            },
 
 
-    button.id =
-        "locationButton";
+            onAdd:function(){
+
+                const button =
+                    L.DomUtil.create(
+                        "button",
+                        "location-control"
+                    );
 
 
-    button.type =
-        "button";
+                button.innerHTML = `
+                    <svg 
+                        viewBox="0 0 24 24"
+                        width="24"
+                        height="24"
+                        aria-hidden="true">
+
+                        <circle
+                            cx="12"
+                            cy="12"
+                            r="5"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"/>
+
+                        <line
+                            x1="12"
+                            y1="2"
+                            x2="12"
+                            y2="6"
+                            stroke="currentColor"
+                            stroke-width="2"/>
+
+                        <line
+                            x1="12"
+                            y1="18"
+                            x2="12"
+                            y2="22"
+                            stroke="currentColor"
+                            stroke-width="2"/>
+
+                        <line
+                            x1="2"
+                            y1="12"
+                            x2="6"
+                            y2="12"
+                            stroke="currentColor"
+                            stroke-width="2"/>
+
+                        <line
+                            x1="18"
+                            y1="12"
+                            x2="22"
+                            y2="12"
+                            stroke="currentColor"
+                            stroke-width="2"/>
+
+                    </svg>
+                    `;
 
 
-    button.innerHTML =
-        "📍";
+                button.title =
+                    "Find restaurants near me";
 
 
-    button.title =
-        "Find restaurants near me";
+                L.DomEvent.on(
+                    button,
+                    "click",
+                    function(e){
+
+                        L.DomEvent.stopPropagation(e);
+
+                        locateUser();
+
+                    }
+                );
 
 
-    button.addEventListener(
-        "click",
-        function(e){
+                return button;
 
-            e.preventDefault();
+            }
 
-            locateUser();
+        });
 
-        }
+
+
+    map.addControl(
+        new LocationControl()
     );
-
-
-    document.body.appendChild(button);
 
 
 }
@@ -67,9 +130,14 @@ function locateUser(){
 
             userLocation = {
 
-                lat: position.coords.latitude,
+                lat:
+                    position.coords.latitude,
 
-                lon: position.coords.longitude
+                lon:
+                    position.coords.longitude,
+
+                accuracy:
+                    position.coords.accuracy
 
             };
 
@@ -99,8 +167,8 @@ function locateUser(){
             );
 
 
-            refreshDistanceData();
-
+            // refreshDistanceData();
+            showNearbyRestaurants();
 
         },
 
@@ -173,6 +241,10 @@ function locateUser(){
 function showUserLocation(){
 
 
+    /*
+        Remove previous location display
+    */
+
     if(userMarker){
 
         userMarker.remove();
@@ -180,8 +252,60 @@ function showUserLocation(){
     }
 
 
+    if(userAccuracyCircle){
+
+        userAccuracyCircle.remove();
+
+    }
+
+
+
+    /*
+        Accuracy circle
+
+        userLocation.accuracy
+        comes from GPS
+    */
+
+    userAccuracyCircle =
+
+        L.circle(
+
+            [
+                userLocation.lat,
+                userLocation.lon
+            ],
+
+            {
+
+                radius:
+                    userLocation.accuracy,
+
+
+                color:"#2563eb",
+
+                weight:1,
+
+
+                fillColor:"#3b82f6",
+
+                fillOpacity:0.15
+
+            }
+
+        )
+
+        .addTo(map);
+
+
+
+
+    /*
+        Center location dot
+    */
 
     userMarker =
+
         L.circleMarker(
 
             [
@@ -191,25 +315,25 @@ function showUserLocation(){
 
             {
 
-                radius:10,
+                radius:8,
 
-                color:"#2563eb",
+                color:"#ffffff",
 
-                fillColor:"#3b82f6",
+                weight:2,
 
-                fillOpacity:.8
+                fillColor:"#2563eb",
+
+                fillOpacity:1
 
             }
 
         )
+
         .addTo(map);
 
 
 
 }
-
-
-
 
 
 function distanceKm(
@@ -272,7 +396,63 @@ lon2
 
 }
 
+function findNearbyRestaurants(
+    radiusKm = 1
+){
 
+
+    if(!userLocation)
+        return [];
+
+
+    return AppState.restaurants
+
+        .map(restaurant=>{
+
+
+            return {
+
+                ...restaurant,
+
+                distance:
+
+                    distanceKm(
+
+                        userLocation.lat,
+
+                        userLocation.lon,
+
+                        restaurant.lat,
+
+                        restaurant.lon
+
+                    )
+
+            };
+
+
+        })
+
+
+        .filter(restaurant=>{
+
+
+            return restaurant.distance <= radiusKm;
+
+
+        })
+
+
+        .sort(
+
+            (a,b)=>
+
+                a.distance -
+                b.distance
+
+        );
+
+}
 
 function addDistance(row){
 
@@ -282,6 +462,9 @@ function addDistance(row){
 
 
     const km =
+
+        row.distance ??
+
         distanceKm(
 
             userLocation.lat,
@@ -314,14 +497,117 @@ function addDistance(row){
 function refreshDistanceData(){
 
 
-    if(!currentResults.length)
+    if(!userLocation)
         return;
 
+
+    currentResults =
+
+        findNearbyRestaurants(
+            1
+        );
+
+
+    renderSearchResults(
+
+        currentResults
+
+    );
+
+}
+
+function showNearbyRestaurants(){
+
+
+    const nearby =
+
+        findNearbyRestaurants(
+            1
+        );
+
+
+    console.log(
+        "Nearby restaurants:",
+        nearby
+    );
+
+
+    currentResults =
+        nearby;
 
 
     renderSearchResults(
         currentResults
     );
+
+
+}
+
+function findNearbyRestaurants(radiusKm = 1){
+
+
+    if(!userLocation)
+        return [];
+
+
+
+    return AppState.restaurants
+
+        .map(restaurant=>{
+
+
+            const distance =
+
+                distanceKm(
+
+                    userLocation.lat,
+
+                    userLocation.lon,
+
+                    restaurant.lat,
+
+                    restaurant.lon
+
+                );
+
+
+            return {
+
+                restaurant,
+
+                distance
+
+            };
+
+
+        })
+
+
+        .filter(item=>{
+
+
+            return item.distance <= radiusKm;
+
+
+        })
+
+
+        .sort((a,b)=>{
+
+
+            return a.distance - b.distance;
+
+
+        })
+
+
+        .map(item=>{
+
+
+            return item.restaurant;
+
+
+        });
 
 
 }

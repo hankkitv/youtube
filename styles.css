@@ -1056,3 +1056,90 @@ body {
     display:none;
 
 }
+
+/* Map distance scale */
+
+.leaflet-control-scale {
+    margin-bottom: 20px;
+    margin-right: 12px;
+}
+
+
+.leaflet-control-scale-line {
+
+    background: rgba(255,255,255,0.85);
+
+    border: 2px solid #333;
+
+    border-top: none;
+
+    color:#222;
+
+    font-size:12px;
+
+    font-weight:600;
+
+    padding:2px 6px;
+
+    border-radius:4px;
+
+}
+
+/* User location button */
+
+.location-control {
+
+    width:42px;
+    height:42px;
+
+    border-radius:50%;
+
+    background:#fff;
+
+    border:none;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    color:#2563eb;
+
+    cursor:pointer;
+
+    box-shadow:
+        0 2px 8px rgba(0,0,0,.25);
+
+}
+
+
+.location-control:hover {
+
+    background:#f3f4f6;
+
+}
+
+
+.location-control.locating svg {
+
+    animation:
+        locationPulse 1s infinite;
+
+}
+
+
+.location-control.active {
+
+    color:#1d4ed8;
+
+}
+
+
+@keyframes locationPulse {
+
+    50% {
+
+        opacity:.35;
+
+    }
+
+}
