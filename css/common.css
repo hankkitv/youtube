@@ -1,0 +1,735 @@
+/* =========================================
+   HankkiTV Map UI
+   COMMON STYLES
+   ========================================= */
+
+
+/* =========================================
+   BASE
+   ========================================= */
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+
+  overflow: hidden;
+}
+
+#map {
+  position: absolute;
+  inset: 0;
+}
+
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+}
+
+
+/* =========================================
+   SEARCH BAR
+   ========================================= */
+
+.search-container {
+  pointer-events: none;
+}
+
+.search-box {
+  pointer-events: auto;
+
+  display: flex;
+
+  align-items: center;
+
+  background: white;
+
+  border-radius: 18px;
+
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.18);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.search-box:focus-within {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 12px 35px rgba(0, 0, 0, 0.25);
+}
+
+.search-icon {
+  padding: 0 14px;
+
+  font-size: 22px;
+}
+
+#searchInput {
+  flex: 1;
+
+  min-width: 0;
+
+  border: none;
+
+  outline: none;
+
+  padding: 16px 10px;
+
+  font-size: 16px;
+
+  background: transparent;
+}
+
+#clearSearch {
+  padding: 0 16px;
+
+  color: #777;
+
+  font-size: 20px;
+
+  cursor: pointer;
+}
+
+
+/* =========================================
+   SEARCH RESULTS
+   ========================================= */
+
+#searchResults {
+  display: none;
+
+  box-sizing: border-box;
+
+  background: white;
+
+  overflow: hidden;
+
+  overscroll-behavior: contain;
+}
+
+
+/* =========================================
+   SHEET HEADER
+   ========================================= */
+
+.sheet-handle {
+  width: 42px;
+
+  height: 5px;
+
+  background: #d0d0d0;
+
+  border-radius: 20px;
+
+  margin: 12px auto;
+}
+
+.sheet-header {
+  padding: 8px 18px 15px;
+
+  font-size: 18px;
+
+  font-weight: 700;
+
+  border-bottom: 1px solid #eee;
+}
+
+
+/* =========================================
+   RESULTS LIST
+   ========================================= */
+
+#resultsList {
+  overflow-y: auto;
+
+  overflow-x: hidden;
+
+  height: calc(100% - 60px);
+
+  overscroll-behavior: contain;
+
+  -webkit-overflow-scrolling: touch;
+
+  min-height: 0;
+}
+
+
+/* =========================================
+   RESULT CARD
+   ========================================= */
+
+.result-item {
+  padding: 18px;
+
+  border-bottom: 1px solid #ededed;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    transform 0.15s ease;
+}
+
+.result-item:hover {
+  background: #f7faff;
+}
+
+.result-item:active {
+  background: #edf5ff;
+
+  transform: scale(0.99);
+}
+
+.result-title {
+  font-size: 17px;
+
+  font-weight: 700;
+
+  color: #222;
+
+  margin-bottom: 8px;
+}
+
+.result-sub {
+  font-size: 14px;
+
+  line-height: 1.55;
+
+  color: #666;
+}
+
+.result-item.selected-result {
+  background: #e8f1ff;
+
+  border-left: 5px solid #2563eb;
+}
+
+.result-item.selected-result .result-title {
+  color: #2563eb;
+}
+
+
+/* =========================================
+   LEAFLET CONTROLS
+   ========================================= */
+
+.leaflet-control-scale {
+  margin-bottom: 20px;
+
+  margin-right: 12px;
+}
+
+.leaflet-control-scale-line {
+  background: rgba(255, 255, 255, 0.85);
+
+  border: 2px solid #333;
+
+  border-top: none;
+
+  color: #222;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+  padding: 2px 6px;
+
+  border-radius: 4px;
+}
+
+
+/* =========================================
+   USER LOCATION BUTTON
+   ========================================= */
+
+.location-control {
+  width: 42px;
+
+  height: 42px;
+
+  border-radius: 50%;
+
+  background: #fff;
+
+  border: none;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  color: #2563eb;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.location-control:hover {
+  background: #f3f4f6;
+}
+
+.location-control.locating svg {
+  animation: locationPulse 1s infinite;
+}
+
+.location-control.active {
+  color: #1d4ed8;
+}
+
+
+/* =========================================
+   RESTAURANT MARKERS
+   ========================================= */
+
+.restaurant-marker {
+  width: 44px;
+
+  height: 44px;
+
+  border-radius: 50%;
+
+  background: white;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border: 3px solid white;
+
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.35);
+
+  overflow: hidden;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.restaurant-marker img {
+  width: 40px;
+
+  height: 40px;
+
+  object-fit: contain;
+}
+
+.restaurant-marker.selected {
+  transform: scale(1.35);
+
+  box-shadow:
+    0 0 0 10px rgba(37, 99, 235, 0.25),
+    0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+
+/* =========================================
+   RESTAURANT DETAILS
+   ========================================= */
+
+#restaurantDetails {
+  position: absolute;
+
+  z-index: 6000;
+
+  background: white;
+
+  display: none;
+
+  box-shadow:
+    0 -8px 35px rgba(0, 0, 0, 0.25);
+
+  overflow: hidden;
+
+  flex-direction: column;
+}
+
+
+/* =========================================
+   VIDEO
+   ========================================= */
+
+.video-fullbleed {
+  width: 100%;
+
+  height: 280px;
+
+  overflow: hidden;
+
+  flex-shrink: 0;
+}
+
+.video-fullbleed iframe {
+  width: 100%;
+
+  height: 100%;
+
+  border: 0;
+
+  display: block;
+}
+
+
+/* =========================================
+   DETAIL INFORMATION
+   ========================================= */
+
+.detail-info {
+  flex: 1;
+
+  overflow-y: auto;
+
+  padding: 20px;
+
+  padding-bottom: 100px;
+
+  min-height: 0;
+}
+
+.detail-header {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: flex-start;
+
+  gap: 12px;
+}
+
+.detail-title {
+  font-size: 22px;
+
+  font-weight: 700;
+
+  margin-bottom: 8px;
+}
+
+.detail-alias {
+  color: #777;
+
+  font-size: 15px;
+
+  margin-bottom: 12px;
+}
+
+.detail-address {
+  color: #666;
+
+  line-height: 1.5;
+
+  margin-bottom: 15px;
+}
+
+
+/* =========================================
+   FAVORITE BUTTON
+   ========================================= */
+
+.favorite-button {
+  width: 42px;
+
+  height: 42px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  border: none;
+
+  background: white;
+
+  box-shadow:
+    0 3px 12px rgba(0, 0, 0, 0.2);
+
+  font-size: 22px;
+
+  cursor: pointer;
+}
+
+.favorite-button:active {
+  transform: scale(0.9);
+}
+
+
+/* =========================================
+   MENU
+   ========================================= */
+
+.detail-menu {
+  margin: 15px 0;
+
+  padding: 14px;
+
+  background: #f7f7f7;
+
+  border-radius: 16px;
+
+  line-height: 1.6;
+}
+
+.detail-menu div {
+  margin-top: 8px;
+
+  color: #555;
+}
+
+
+/* =========================================
+   DETAIL ACTION BAR
+   ========================================= */
+
+.detail-bottom-actions {
+  position: absolute;
+
+  bottom: 0;
+
+  left: 0;
+
+  right: 0;
+
+  padding: 12px 20px;
+
+  padding-bottom:
+    calc(12px + env(safe-area-inset-bottom));
+
+  background: white;
+
+  display: flex;
+
+  gap: 0;
+
+  z-index: 20;
+}
+
+.detail-button,
+.share-button {
+  flex: 1;
+
+  height: 46px;
+
+  border: none;
+
+  background: #6d6d69;
+
+  color: white;
+
+  font-size: 15px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+}
+
+.detail-button:first-child {
+  border-radius: 14px 0 0 14px;
+}
+
+.share-button:last-child {
+  border-radius: 0 14px 14px 0;
+}
+
+.detail-button + .detail-button,
+.detail-button + .share-button {
+  border-left:
+    1px solid rgba(255, 255, 255, 0.35);
+}
+
+.detail-button:active,
+.share-button:active {
+  background: #6d6d69;
+}
+
+.detail-button.secondary {
+  background: #6d6d69;
+
+  color: white;
+}
+
+
+/* =========================================
+   CLOSE BUTTON
+   ========================================= */
+
+#closeDetails {
+  position: absolute;
+
+  right: 15px;
+
+  top: 12px;
+
+  z-index: 30;
+
+  border: none;
+
+  background: #eee;
+
+  width: 34px;
+
+  height: 34px;
+
+  border-radius: 50%;
+}
+
+
+/* =========================================
+   OFFLINE BANNER
+   ========================================= */
+
+#offlineBanner {
+  position: absolute;
+
+  top: 0;
+
+  left: 0;
+
+  right: 0;
+
+  z-index: 9999;
+
+  background: #111;
+
+  color: white;
+
+  text-align: center;
+
+  padding: 8px;
+
+  display: none;
+}
+
+
+/* =========================================
+   APP LOADER
+   ========================================= */
+
+#appLoader {
+  position: fixed;
+
+  inset: 0;
+
+  background: #ffffff;
+
+  z-index: 99999;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  transition: opacity 0.5s ease;
+}
+
+#appLoader.loaded {
+  opacity: 0;
+
+  pointer-events: none;
+}
+
+.loaderBox {
+  text-align: center;
+
+  width: 220px;
+}
+
+.loaderBox img {
+  width: 70px;
+
+  height: 70px;
+
+  margin-bottom: 20px;
+}
+
+#loaderText {
+  font-size: 15px;
+
+  color: #444;
+
+  margin-bottom: 15px;
+}
+
+.loaderBar {
+  height: 6px;
+
+  background: #e5e7eb;
+
+  border-radius: 10px;
+
+  overflow: hidden;
+}
+
+#loaderProgress {
+  height: 100%;
+
+  width: 0;
+
+  background: #2563eb;
+
+  transition: width 0.3s ease;
+}
+
+
+/* =========================================
+   ANIMATIONS
+   ========================================= */
+
+@keyframes locationPulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes sheetUp {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes detailUp {
+  from {
+    transform: translateY(100%);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+
+/* =========================================
+   SAFE AREA
+   ========================================= */
+
+@supports (padding: max(0px)) {
+  #restaurantDetails {
+    padding-bottom:
+      env(safe-area-inset-bottom);
+  }
+}

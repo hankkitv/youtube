@@ -11,29 +11,35 @@ const Loader = {
     }
 
     if (bar) {
-      bar.style.width = percent + "%";
+      requestAnimationFrame(() => {
+        bar.style.width = `${percent}%`;
+      });
     }
   },
 
   hide() {
     const loader = document.getElementById("appLoader");
 
-    if (loader) {
-      loader.classList.add("loaded");
-
-      setTimeout(() => {
-        loader.remove();
-      }, 500);
+    if (!loader || loader.dataset.hidden) {
+      return;
     }
+
+    loader.dataset.hidden = "true";
+
+    loader.classList.add("loaded");
+
+    setTimeout(() => {
+      loader.remove();
+    },500);
   },
 };
 
-async function waitFor(condition, timeout = 10000) {
+async function waitFor(condition, name, timeout = 10000) {
   const start = Date.now();
 
   while (!condition()) {
     if (Date.now() - start > timeout) {
-      throw new Error("Library loading timeout");
+      throw new Error(`${name} loading timeout`);
     }
 
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -72,9 +78,14 @@ async function bootApplication() {
 
     Loader.update("Starting map...", 50);
 
-    await waitFor(() => typeof initializeMap === "function");
+    // await waitFor(() => typeof initializeMap === "function");
 
-    initializeMap();
+    const map = await initializeMap();
+
+    // if(typeof initializeTransit === "function"){
+
+    //     await initializeTransit(map);
+    // }
 
     // -----------------------------
     // 3. Load restaurant data
@@ -82,9 +93,18 @@ async function bootApplication() {
 
     Loader.update("Loading restaurants...", 70);
 
-    await waitFor(() => typeof loadRestaurants === "function");
-
     await loadRestaurants();
+    // await waitFor(() => typeof loadRestaurants === "function");
+
+    // await loadRestaurants(progress => {
+    //   Loader.update(
+    //       `Loading restaurants ${progress}%`,
+    //       50 + progress * 0.2
+    //   );
+    // });
+
+    Loader.update("Loading subway stations...", 75);
+    await loadSubwayStations();
 
     // -----------------------------
     // 4. Initialize UI
@@ -99,7 +119,7 @@ async function bootApplication() {
     if (typeof initializeLocation === "function") {
       Loader.update("Preparing location...", 90);
 
-      initializeLocation();
+      await initializeLocation();
     }
 
     // -----------------------------
@@ -139,14 +159,27 @@ async function bootApplication() {
     window.dispatchEvent(
         new Event("appReady")
     );
-    
+
   } catch (error) {
     console.error("Application startup failed:", error);
 
-    Loader.update("Unable to load application", 100);
+    Loader.update(
+      "Unable to load application. Please refresh.",
+      100
+    );
+
+    // Loader.reset();
 
     appStarted = false;
   }
 }
+
+Loader.reset = () => {
+  const loader = document.getElementById("appLoader");
+
+  if (loader) {
+    loader.classList.remove("loaded");
+  }
+};
 
 window.addEventListener("DOMContentLoaded", bootApplication);

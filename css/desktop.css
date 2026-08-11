@@ -1,0 +1,110 @@
+ /* =========================================
+    HankkiTV
+    DESKTOP LAYOUT
+    ========================================= */
+
+
+/* =========================================
+   SEARCH BAR
+   ========================================= */
+
+.search-container {
+  position: absolute;
+
+  z-index: 5000;
+
+  top: max(12px, env(safe-area-inset-top));
+
+  left: 30px;
+
+  right: auto;
+
+  pointer-events: none;
+}
+
+.search-box {
+  width: 420px;
+}
+
+
+/* =========================================
+   SEARCH RESULTS
+   ========================================= */
+
+#searchResults {
+  position: absolute;
+
+  z-index: 5001;
+
+  top: 85px;
+
+  left: 30px;
+
+  right: auto;
+
+  width: 420px;
+
+  height: 85vh;
+
+  max-height: 85vh;
+
+  box-sizing: border-box;
+
+  background: white;
+
+  border-radius: 20px;
+
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.20);
+
+  overflow: hidden;
+}
+
+
+/* =========================================
+   RESULTS LIST
+   ========================================= */
+
+#resultsList {
+  height: calc(100% - 60px);
+
+  overflow-y: auto;
+
+  overflow-x: hidden;
+
+  -webkit-overflow-scrolling: touch;
+}
+
+
+/* =========================================
+   RESTAURANT DETAILS
+   ========================================= */
+
+#restaurantDetails {
+  position: absolute;
+
+  z-index: 4000;
+
+  left: 30px;
+
+  right: auto;
+
+  bottom: 30px;
+
+  width: 420px;
+
+  max-height: 85vh;
+
+  border-radius: 22px;
+
+  box-sizing: border-box;
+}
+
+
+/* =========================================
+   DETAIL VIDEO
+   ========================================= */
+
+.video-fullbleed {
+  height: 280px;
+}

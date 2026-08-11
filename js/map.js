@@ -4,9 +4,11 @@ let map;
 let markerCluster;
 
 let baseLayers = {};
+let transitLayers = {};
+
 let activeBaseLayer = null;
 
-function initializeMap() {
+async function initializeMap() {
   // 1. Create map FIRST
 
   map = L.map("map", {
@@ -16,44 +18,15 @@ function initializeMap() {
 
     zoomControl: false,
   })
-
-    .setView([37.5638288, 126.9800428], 13);
+  .setView([37.5638288, 126.9800428], 13);
 
   // 2. Create layers
 
   createBaseLayers();
 
-  // 3. Restore previous layer
+  await initializeTransit(map);
 
-  restoreMapLayer();
-
-  // 4. Layer control
-
-  L.control
-    .layers(
-      baseLayers,
-
-      null,
-
-      {
-        position: "topright",
-
-        collapsed: true,
-      },
-    )
-
-    .addTo(map);
-
-  // 5. Scale
-
-  L.control
-    .scale({
-      position: "bottomright",
-
-      imperial: false,
-    })
-
-    .addTo(map);
+  createTransitLayers();
 
   // 6. Marker cluster
 
@@ -70,6 +43,26 @@ function initializeMap() {
   });
 
   map.addLayer(markerCluster);
+
+  // 3. Restore previous layer
+
+  restoreMapLayer();
+
+  // 4. Layer control
+  createLayerControl();
+
+  // 5. Scale
+
+  L.control
+    .scale({
+      position: "bottomright",
+
+      imperial: false,
+    })
+
+    .addTo(map);
+
+  
 
   // 7. Remember layer changes
 
@@ -140,6 +133,41 @@ function createBaseLayers() {
       attribution: "© Esri",
     },
   );
+}
+
+function createTransitLayers(){
+
+    if(
+        typeof getTransitLayers === "function"
+    ){
+
+        transitLayers =
+            getTransitOverlayLayers();
+
+    }
+
+}
+
+function createLayerControl(){
+
+    L.control
+        .layers(
+
+            baseLayers,
+
+            transitLayers,
+
+            {
+                position:"topright",
+
+                collapsed:true
+
+            }
+
+        )
+
+        .addTo(map);
+
 }
 
 function restoreMapLayer() {

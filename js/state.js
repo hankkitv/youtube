@@ -2,7 +2,7 @@
 
 const AppState = {
   restaurants: [],
-
+  subwayStations: [],
   markers: [],
 
   selectedRestaurant: null,

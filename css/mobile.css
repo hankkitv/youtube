@@ -1,0 +1,279 @@
+/* =========================================
+   HankkiTV
+   MOBILE LAYOUT
+   ========================================= */
+
+
+/* =========================================
+   MOBILE VARIABLES
+   ========================================= */
+
+:root {
+  --mobile-search-gap: 8px;
+
+  /*
+   * Set by mobile.js.
+   *
+   * This is the bottom edge of the visible
+   * viewport when the keyboard is open.
+   */
+  --keyboard-height: 0px;
+
+  /*
+   * Set by mobile.js.
+   */
+  --mobile-content-top: 70px;
+}
+
+
+/* =========================================
+   SEARCH BAR
+   ========================================= */
+
+.search-container {
+  position: fixed;
+
+  top: max(
+    8px,
+    env(safe-area-inset-top)
+  );
+
+  left: 0;
+
+  right: 0;
+
+  z-index: 10000;
+
+  padding:
+    0 10px;
+
+  box-sizing: border-box;
+
+  pointer-events: none;
+}
+
+.search-box {
+  width: 100%;
+
+  border-radius: 14px;
+
+  box-shadow:
+    0 4px 18px rgba(0, 0, 0, 0.18);
+}
+
+
+/* =========================================
+   SEARCH RESULTS
+   ========================================= */
+
+#searchResults {
+  position: fixed;
+
+  top: var(--mobile-content-top);
+
+  left: 0;
+
+  right: 0;
+
+  bottom: var(--keyboard-height);
+
+  width: 100%;
+
+  height: auto;
+
+  max-height: none;
+
+  box-sizing: border-box;
+
+  border-radius: 0;
+
+  box-shadow: none;
+
+  background: white;
+
+  z-index: 4000;
+
+  overflow: hidden;
+
+  overscroll-behavior: contain;
+
+  animation: none;
+}
+
+
+/* =========================================
+   SEARCH RESULT LIST
+   ========================================= */
+
+#resultsList {
+  height: calc(100% - 60px);
+
+  min-height: 0;
+
+  overflow-y: auto;
+
+  overflow-x: hidden;
+
+  overscroll-behavior: contain;
+
+  -webkit-overflow-scrolling: touch;
+
+  touch-action: pan-y;
+}
+
+
+/* =========================================
+   SEARCH HEADER
+   ========================================= */
+
+.sheet-handle {
+  display: none;
+}
+
+.sheet-header {
+  padding:
+    14px 18px;
+
+  font-size: 18px;
+
+  font-weight: 700;
+
+  border-bottom:
+    1px solid #eee;
+}
+
+
+/* =========================================
+   RESULT ITEMS
+   ========================================= */
+
+.result-item {
+  padding: 18px;
+
+  border-bottom:
+    1px solid #ededed;
+}
+
+
+/* =========================================
+   RESTAURANT DETAILS
+   ========================================= */
+
+#restaurantDetails {
+  position: fixed;
+
+  top: var(--mobile-content-top);
+
+  left: 0;
+
+  right: 0;
+
+  bottom: var(--keyboard-height);
+
+  width: 100%;
+
+  height: auto;
+
+  max-height: none;
+
+  box-sizing: border-box;
+
+  border-radius: 0;
+
+  box-shadow: none;
+
+  background: white;
+
+  z-index: 3000;
+
+  overflow: hidden;
+
+  animation: none;
+}
+
+
+/* =========================================
+   DETAIL INFORMATION
+   ========================================= */
+
+.detail-info {
+  min-height: 0;
+
+  overflow-y: auto;
+
+  overflow-x: hidden;
+
+  -webkit-overflow-scrolling: touch;
+
+  overscroll-behavior: contain;
+
+  padding:
+    20px;
+
+  padding-bottom:
+    100px;
+}
+
+
+/* =========================================
+   MOBILE VIDEO
+   ========================================= */
+
+.video-fullbleed {
+  width: 100%;
+
+  height: 260px;
+
+  flex-shrink: 0;
+}
+
+
+/* =========================================
+   MOBILE CLOSE BUTTON
+   ========================================= */
+
+#closeDetails {
+  top: 12px;
+
+  right: 15px;
+}
+
+
+/* =========================================
+   MOBILE ACTION BAR
+   ========================================= */
+
+.detail-bottom-actions {
+  padding:
+    12px 20px;
+
+  padding-bottom:
+    calc(
+      12px +
+      env(safe-area-inset-bottom)
+    );
+}
+
+
+/* =========================================
+   LEAFLET CONTROLS
+   ========================================= */
+
+.leaflet-top.leaflet-right {
+  margin-top: 75px;
+}
+
+
+/* =========================================
+   MOBILE SAFE AREA
+   ========================================= */
+
+@supports (padding: max(0px)) {
+  .search-container {
+    padding-top:
+      max(
+        0px,
+        env(safe-area-inset-top)
+      );
+  }
+}
